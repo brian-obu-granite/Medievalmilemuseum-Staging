@@ -910,9 +910,11 @@ var RocketPreloadLinksConfig = {"excludeUris":"/(?:.+/)?feed(?:/(?:.+/?)?)?$|/(?
 		if ($nav.hasClass('slick-initialized')) { $nav.slick('setPosition'); }
 	}
 	// variableWidth slick sliders measure slide widths at init time; if the
-	// site's custom @font-face fonts haven't swapped in yet, those measurements
+	// site's custom @font-face fonts, images, or a delayed init (e.g. WP
+	// Rocket's "delay JS execution" deferring the slick init script itself
+	// until first user interaction) haven't settled yet, those measurements
 	// (and the resulting track transform) are wrong and never self-correct,
-	// which is why a manual refresh (fonts already cached) "fixes" it.
+	// which is why a manual refresh (everything already cached/settled) "fixes" it.
 	if (document.fonts && document.fonts.ready) {
 		document.fonts.ready.then(fixCardSliderPosition);
 	}
@@ -920,6 +922,21 @@ var RocketPreloadLinksConfig = {"excludeUris":"/(?:.+/)?feed(?:/(?:.+/?)?)?$|/(?
 		fixCardSliderPosition();
 	} else {
 		window.addEventListener('load', fixCardSliderPosition);
+	}
+	// Belt-and-suspenders: watch the slider itself for ANY size change, so we
+	// catch cases the two triggers above miss (e.g. slick's own init being
+	// delayed past window.load, or a width change from something unrelated).
+	var sliderEl = document.querySelector('.section-card_slider .slider');
+	if (sliderEl && window.ResizeObserver) {
+		var lastWidth = 0;
+		var ro = new ResizeObserver(function (entries) {
+			var w = entries[0].contentRect.width;
+			if (Math.abs(w - lastWidth) > 1) {
+				lastWidth = w;
+				fixCardSliderPosition();
+			}
+		});
+		ro.observe(sliderEl);
 	}
 })();
 </script>

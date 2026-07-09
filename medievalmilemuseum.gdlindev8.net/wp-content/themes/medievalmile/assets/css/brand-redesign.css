@@ -257,3 +257,48 @@
 #onetrust-consent-sdk #onetrust-policy-title {
   color: #EAAC00 !important;
 }
+
+/* ==========================================================================
+   Scroll-direction-aware sticky header
+   .top-bar and .header-wrapper are separate sibling elements (no shared
+   wrapper in the markup), so each is made independently `position: sticky`
+   and moved together via a shared `body.header-hidden` class. Sticky (not
+   fixed) is used so the browser keeps reserving each element's own layout
+   space automatically - no compensating top padding needed on page content.
+   #site-header itself is already `position: absolute` inside .header-wrapper
+   (see site.css .header-footer-group), so it rides along with whatever
+   position .header-wrapper resolves to, stuck or not, without needing its
+   own rule here. Because #site-header is absolutely positioned, it doesn't
+   contribute to .header-wrapper's own box height, so translateY(-100%)
+   would be a near-no-op on .header-wrapper - the hide transform instead
+   uses --site-header-height (#site-header's real measured height) so it
+   actually clears the viewport. Both height custom properties are set from
+   JS (custom.js) since they're responsive. z-index is kept below the mobile
+   menu modal's
+   z-index:99 (.header-footer-group) so the modal still stacks above the
+   header exactly as it does today, and the header only hides while that
+   modal is closed.
+   ========================================================================== */
+.top-bar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  transition: transform 0.3s ease;
+  transform: translateY(0);
+}
+
+.header-wrapper {
+  position: sticky;
+  top: var(--top-bar-height, 0px);
+  z-index: 40;
+  transition: transform 0.3s ease;
+  transform: translateY(0);
+}
+
+body.header-hidden .top-bar {
+  transform: translateY(-100%);
+}
+
+body.header-hidden .header-wrapper {
+  transform: translateY(calc(-1 * var(--site-header-height, 0px) - var(--top-bar-height, 0px)));
+}
