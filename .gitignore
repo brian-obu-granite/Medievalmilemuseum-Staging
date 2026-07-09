@@ -1,0 +1,14 @@
+# Claude Code local tooling config (personal, not project content)
+.claude/settings.local.json
+
+# macOS
+.DS_Store
+**/.DS_Store
+Icon
+Icon?
+
+# Design source assets (large binaries, not site code)
+2. Design/
+
+# Large media not needed to review/edit the site code
+medievalmilemuseum.gdlindev8.net/wp-content/uploads/2026/07/hero-video.mp4

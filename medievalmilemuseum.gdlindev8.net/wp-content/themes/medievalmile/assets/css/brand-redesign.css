@@ -1,0 +1,259 @@
+/* ==========================================================================
+   Museum of Medieval Kilkenny — Brand Redesign Override
+   Applies the updated brand guidelines (colours already recoloured directly
+   in site.css / style.css / custom.css) plus a typeface swap.
+
+   TYPEFACE NOTE:
+   The brand guide specifies Bartender (headlines), Macho (sub-heads/quotes)
+   and Tenon (body copy). These are commercial fonts and no licensed webfont
+   files were available in the project folder, so this override swaps in the
+   closest free Google Fonts as a placeholder — reusing the SAME @font-face
+   family names the theme already references everywhere (Montserrat-*,
+   SourceSerifPro-*), so no other stylesheet needs to change:
+     - Montserrat-ExtraBold / Montserrat-Bold  -> Anton      (headline caps)
+     - Montserrat-SemiBold / Montserrat-Medium -> Baloo 2     (sub-heads/nav/buttons)
+     - SourceSerifPro-Regular / -Semibold      -> Nunito Sans (body copy)
+   Swap these @font-face src URLs for the real Bartender/Macho/Tenon webfont
+   files once licensed, and this file can stay otherwise untouched.
+   ========================================================================== */
+
+@font-face {
+  font-family: Montserrat-ExtraBold;
+  src: url(https://fonts.gstatic.com/s/anton/v27/1Ptgg87LROyAm0K0.ttf) format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: Montserrat-Bold;
+  src: url(https://fonts.gstatic.com/s/anton/v27/1Ptgg87LROyAm0K0.ttf) format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: Montserrat-SemiBold;
+  src: url(https://fonts.gstatic.com/s/baloo2/v23/wXK0E3kTposypRydzVT08TS3JnAmtdj9yqpv.ttf) format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: Montserrat-Medium;
+  src: url(https://fonts.gstatic.com/s/baloo2/v23/wXK0E3kTposypRydzVT08TS3JnAmtdgozapv.ttf) format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: SourceSerifPro-Regular;
+  src: url(https://fonts.gstatic.com/s/nunitosans/v19/pe1mMImSLYBIv1o4X1M8ce2xCx3yop4tQpF_MeTm0lfGWVpNn64CL7U8upHZIbMV51Q42ptCp5F5bxqqtQ1yiU4G1ilntA.ttf) format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: SourceSerifPro-Semibold;
+  src: url(https://fonts.gstatic.com/s/nunitosans/v19/pe1mMImSLYBIv1o4X1M8ce2xCx3yop4tQpF_MeTm0lfGWVpNn64CL7U8upHZIbMV51Q42ptCp5F5bxqqtQ1yiU4GCC5ntA.ttf) format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ==========================================================================
+   Contrast fixes for the new brand palette.
+   The old rainbow accent system (pink/orange/teal/purple/blue) has been
+   recoloured to the new brand amber/gold/bronze tones. Those tones are much
+   lighter than the old colours, so anywhere the theme paints white text on
+   top of a coloured card/slide/button, that text needs to switch to the
+   brand near-black (#161412) to stay readable. The dark ("green") variant
+   is unaffected since near-black + white already has strong contrast.
+   ========================================================================== */
+.lbs__item__card.red,
+.lbs__item__card.orange,
+.lbs__item__card.yellow,
+.lbs__item__card.purple,
+.lbs__item__card.blue,
+.slider__slide-link.blue {
+  color: #161412 !important;
+}
+
+/* wine/plum/navy/forest (formerly yellow/orange/red/purple) got dark brand
+   colours instead of light amber ones, so they need light text instead of
+   the near-black used by the still-light lbs__item__card/blue variants above. */
+.slider__slide-link.navy,
+.slider__slide-link.plum,
+.slider__slide-link.wine,
+.slider__slide-link.forest {
+  color: #fff !important;
+}
+
+.lbs__item__card.red .lbs__item__card__heading,
+.lbs__item__card.orange .lbs__item__card__heading,
+.lbs__item__card.yellow .lbs__item__card__heading,
+.lbs__item__card.purple .lbs__item__card__heading,
+.lbs__item__card.blue .lbs__item__card__heading,
+.slider__slide-link.blue .slider__slide-heading {
+  color: #161412 !important;
+}
+
+.slider__slide-link.navy .slider__slide-heading,
+.slider__slide-link.plum .slider__slide-heading,
+.slider__slide-link.wine .slider__slide-heading,
+.slider__slide-link.forest .slider__slide-heading {
+  color: #fff !important;
+}
+
+/* NOTE for full-site rollout: .quote_box__bg uses the same variant classes
+   (red/orange/yellow/purple/blue) but the heading text lives in a sibling
+   element, not a descendant, so it can't be scoped the same way here. The
+   homepage only uses the dark ("green") quote box variant, which is fine
+   as-is. If a lighter quote box variant is used on another page, its
+   .quote_box__heading / .quote_box__sub-heading text will need a manual
+   dark-text override at that point. */
+
+/* ==========================================================================
+   Homepage hero: undo the parent theme's slick fade-in gate
+   style.css hides .hero by default (opacity:0; visibility:hidden) and only
+   reveals it via ".section-hero > .hero.slick-initialized" — a class that
+   slick.js used to add once it finished initialising the carousel. Now that
+   slick is gone, nothing ever adds that class, so the whole hero (video,
+   copy, and the toggle button) stays invisible forever. Reveal it
+   unconditionally instead; this rule loads after style.css so it wins the
+   cascade at equal specificity.
+   ========================================================================== */
+.section-hero > .hero {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* ==========================================================================
+   Homepage hero: single autoplaying video + pause/play toggle
+   The hero carousel was reduced to a single slide, and its background image
+   swapped for a native <video>. It shares .hero__item__img so it already
+   inherits the existing cover/positioning rules; this just guards against
+   the browser's default inline display for <video>.
+
+   .hero__item is position:relative but was never given an explicit height —
+   it just sized itself to its content. slick.js used to silently patch in a
+   computed pixel height as part of its own init (adaptiveHeight), which is
+   what let .hero__item__img__wrapper's height:100% (and thus the video's)
+   actually resolve to something. CSS percentage heights only resolve against
+   an ancestor with an explicit height, not one merely sized by content — so
+   with slick gone, that 100% collapsed to nothing, taking the absolutely
+   positioned video AND the absolutely positioned toggle button with it.
+   Fixing it here with plain CSS, no JS/library involved, using the same
+   values the text overlay already uses at each breakpoint so it stays
+   pixel-consistent with the existing design.
+   ========================================================================== */
+.hero__item {
+  height: 54.6875vw;
+}
+
+@media (max-width: 1279px) {
+  .hero__item {
+    height: 560px;
+  }
+}
+
+@media (max-width: 767px) {
+  .hero__item {
+    height: 480px;
+  }
+}
+
+.hero__item__video {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  object-fit: cover !important;
+  object-position: center !important;
+}
+
+/* Belt-and-suspenders: guarantee exactly one icon renders regardless of
+   any leftover slick.js inline styles or specificity quirks. */
+.hero__video-toggle__icon[hidden] {
+  display: none !important;
+}
+
+.hero__video-toggle {
+  position: absolute;
+  right: 2.34375vw;
+  bottom: 3.64583vw;
+  z-index: 10; /* must sit above .hero__item .container (z-index:9), which
+                  otherwise overlays the button and swallows every click */
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: none;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #fff;
+  color: #000;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.hero__video-toggle:hover {
+  background-color: #F3B100;
+  color: #161412;
+}
+
+.hero__video-toggle:focus-visible {
+  background-color: #F3B100;
+  color: #161412;
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+.hero__video-toggle__icon {
+  width: 20px;
+  height: 20px;
+}
+
+@media (max-width: 767px) {
+  .hero__video-toggle {
+    right: 16px;
+    bottom: 16px;
+    width: 44px;
+    height: 44px;
+  }
+}
+
+/* ==========================================================================
+   OneTrust cookie consent banner
+   OneTrust injects its own <style> block at runtime (a remote theme config
+   for this domain) using these exact same selectors, added to the DOM after
+   this stylesheet loads. At equal specificity that makes it win on source
+   order alone, so !important is required to override it, not just style.
+   ========================================================================== */
+#onetrust-consent-sdk #onetrust-banner-sdk {
+  background-color: #000000 !important;
+}
+
+#onetrust-consent-sdk #onetrust-pc-btn-handler,
+#onetrust-consent-sdk #onetrust-pc-btn-handler.cookie-setting-link {
+  color: #000000 !important;
+  border-color: #ffffff !important;
+  background-color: #ffffff !important;
+}
+
+#onetrust-consent-sdk #onetrust-accept-btn-handler {
+  color: #000000 !important;
+}
+
+#onetrust-consent-sdk #onetrust-policy-text {
+  color: #ffffff !important;
+}
+
+#onetrust-consent-sdk #onetrust-policy-title {
+  color: #EAAC00 !important;
+}
