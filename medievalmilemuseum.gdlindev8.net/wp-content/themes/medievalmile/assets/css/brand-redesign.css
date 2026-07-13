@@ -260,45 +260,78 @@
 
 /* ==========================================================================
    Scroll-direction-aware sticky header
-   .top-bar and .header-wrapper are separate sibling elements (no shared
-   wrapper in the markup), so each is made independently `position: sticky`
-   and moved together via a shared `body.header-hidden` class. Sticky (not
-   fixed) is used so the browser keeps reserving each element's own layout
-   space automatically - no compensating top padding needed on page content.
-   #site-header itself is already `position: absolute` inside .header-wrapper
-   (see site.css .header-footer-group), so it rides along with whatever
-   position .header-wrapper resolves to, stuck or not, without needing its
-   own rule here. Because #site-header is absolutely positioned, it doesn't
-   contribute to .header-wrapper's own box height, so translateY(-100%)
-   would be a near-no-op on .header-wrapper - the hide transform instead
-   uses --site-header-height (#site-header's real measured height) so it
-   actually clears the viewport. Both height custom properties are set from
-   JS (custom.js) since they're responsive. z-index is kept below the mobile
-   menu modal's
-   z-index:99 (.header-footer-group) so the modal still stacks above the
-   header exactly as it does today, and the header only hides while that
-   modal is closed.
+   .top-bar and .header-wrapper are separate sticky siblings (no shared
+   wrapper in the markup). Sticky (not fixed) so the browser keeps reserving
+   each element's own layout space automatically - no compensating top
+   padding needed on page content. z-index is kept below the mobile menu
+   modal's z-index:99 (.header-footer-group) so the modal still stacks above
+   the header exactly as it does today.
+
+   SINGLE SOURCE OF TRUTH:
+   #site-header's position used to be split across two elements
+   (.header-wrapper carrying a --top-bar-height offset, #site-header
+   carrying a separate scroll-hide offset) with FOUR independent triggers
+   (initial load, resize, ResizeObserver, scroll) each free to push a value
+   with no coordination between them and no gating on webfont load. That
+   patchwork produced a run of distinct bugs over time - a jagged dismiss
+   reposition, an unreliable `top` transition on a sticky element, a pacing
+   mismatch between the two elements' speeds, and an inconsistent gap after
+   fresh loads traced to a font-swap/paint-timing race - each fixed in turn,
+   each a symptom of the same pattern: something computes a position now and
+   assumes nothing else needs to recompute it with different timing before
+   the page settles.
+   This is rebuilt around one function, applyOffset() in custom.js, that is
+   the ONLY thing that ever sets #site-header's transform. It always
+   re-measures the real, current DOM state (never trusts a previously
+   stored value) and applies either instantly (page load, the fonts-ready
+   follow-up, resize, ResizeObserver corrections - none of these are a user
+   gesture, so none of them animate) or over an explicit duration (only the
+   two real gestures: dismissing the strip at 0.3s to match its own
+   collapse below, and scroll-driven hide/show at 0.8s). See custom.js for
+   the actual logic - this stylesheet just needs to NOT declare any
+   transform/transition of its own on #site-header, so JS has sole control.
+   .header-wrapper no longer carries any offset at all; it is purely the
+   sticky anchor #site-header rides inside (already `position: absolute`
+   inside it - see site.css .header-footer-group), which is stable and
+   never needs to change.
    ========================================================================== */
 .top-bar {
   position: sticky;
   top: 0;
   z-index: 50;
-  transition: transform 0.3s ease;
+  overflow: hidden;
+  max-height: 300px;
+  transition:
+    transform 0.8s cubic-bezier(0.22, 1, 0.36, 1),
+    max-height 0.3s ease,
+    opacity 0.3s ease,
+    padding 0.3s ease;
   transform: translateY(0);
 }
 
 .header-wrapper {
   position: sticky;
-  top: var(--top-bar-height, 0px);
+  top: 0;
   z-index: 40;
-  transition: transform 0.3s ease;
-  transform: translateY(0);
 }
 
 body.header-hidden .top-bar {
+  transition:
+    transform 0.8s cubic-bezier(0.22, 1, 0.36, 1),
+    max-height 0.3s ease,
+    opacity 0.3s ease,
+    padding 0.3s ease;
   transform: translateY(-100%);
 }
 
-body.header-hidden .header-wrapper {
-  transform: translateY(calc(-1 * var(--site-header-height, 0px) - var(--top-bar-height, 0px)));
+/* Dismissible announcement strip: .bar-close collapses .top-bar in place
+   (custom.js intercepts the click). This is .top-bar's own visual collapse
+   only - #site-header's repositioning in response is handled entirely by
+   applyOffset() in custom.js, not by anything here. */
+.top-bar.top-bar--dismissed {
+  max-height: 0;
+  opacity: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  pointer-events: none;
 }

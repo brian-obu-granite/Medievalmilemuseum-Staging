@@ -1,0 +1,156 @@
+document.addEventListener("DOMContentLoaded",function(){var lazyVideos=[].slice.call(document.querySelectorAll("video.lazy"));if("IntersectionObserver" in window){var lazyVideoObserver=new IntersectionObserver(function(entries,observer){entries.forEach(function(video){if(video.isIntersecting){for(var source in video.target.children){var videoSource=video.target.children[source];if(typeof videoSource.tagName==="string"&&videoSource.tagName==="SOURCE"){videoSource.src=videoSource.dataset.src}}
+video.target.load();video.target.classList.remove("lazy");lazyVideoObserver.unobserve(video.target)}})});lazyVideos.forEach(function(lazyVideo){lazyVideoObserver.observe(lazyVideo)})}})
+
+// Scroll-direction-aware sticky header, rebuilt around a single source of
+// truth: applyOffset() below is the ONLY thing that ever sets #site-header's
+// transform. Every trigger (load, fonts finishing, resize, ResizeObserver,
+// dismiss click, scroll direction, mobile menu) just tells it "recompute and
+// apply now" - none of them push a position value directly, so nothing can
+// disagree with anything else about where the header should currently sit.
+// Leading semicolon guards against the previous statement (a bare function
+// call with no trailing semicolon) being parsed as a call of this IIFE.
+;(function () {
+  var topBar = document.querySelector(".top-bar");
+  var headerWrapper = document.querySelector(".header-wrapper");
+  var siteHeader = document.getElementById("site-header");
+  if (!headerWrapper || !siteHeader) { return; }
+
+  var HIDE_CLASS = "header-hidden";
+  var DISMISS_MS = 300;
+  var SCROLL_MS = 800;
+  var SCROLL_EASING = "cubic-bezier(0.22, 1, 0.36, 1)";
+
+  var isHidden = false;
+
+  function currentTopBarHeight() {
+    return (topBar && !topBar.classList.contains("top-bar--dismissed"))
+      ? topBar.offsetHeight
+      : 0;
+  }
+
+  // #site-header's own natural height (unaffected by its own transform -
+  // transforms never change layout/offsetHeight).
+  function currentSiteHeaderHeight() {
+    return siteHeader.offsetHeight;
+  }
+
+  // The one and only place that decides #site-header's position. Always
+  // re-measures the real, current DOM state rather than trusting any
+  // previously-stored value, so it can never go stale or disagree with
+  // reality - and always fully recomputes both the hidden and visible
+  // targets, so top-bar-height changes and scroll-hidden changes can never
+  // race each other into an inconsistent combined result.
+  //
+  // animateMs/easing are omitted (falsy) for anything that's a correction
+  // rather than a user gesture - initial load, the fonts-ready follow-up,
+  // window resize, and the ResizeObserver catch-all - so those never
+  // produce a visible glide, only the two real gestures (dismiss, scroll
+  // direction change) do, each at its own explicit speed.
+  function applyOffset(animateMs, easing) {
+    var target = isHidden ? -currentSiteHeaderHeight() : currentTopBarHeight();
+    if (animateMs) {
+      siteHeader.style.transitionProperty = "transform";
+      siteHeader.style.transitionDuration = animateMs + "ms";
+      siteHeader.style.transitionTimingFunction = easing;
+    } else {
+      siteHeader.style.transitionProperty = "none";
+    }
+    siteHeader.style.transform = "translateY(" + target + "px)";
+  }
+
+  // Initial position, applied instantly (no fallback-then-animate flash):
+  // best-effort immediately using whatever is measurable right now, then
+  // corrected - still instantly, since this is fixing a measurement, not
+  // responding to a gesture - once webfonts actually finish loading. This
+  // closes the race where a fallback-font measurement of the top bar's
+  // height (taken before the real font swaps in and reflows it) produced a
+  // wrong, inconsistent gap on some loads and not others.
+  applyOffset();
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(function () { applyOffset(); });
+  }
+
+  // A live window resize fires many events in a burst; animating toward a
+  // constantly-moving target during that would look worse than just
+  // tracking it directly, so this is always instant too.
+  window.addEventListener("resize", function () { applyOffset(); });
+
+  // Catch-all for any height change the above miss (e.g. .top-bar's own
+  // dismiss-collapse animation still in flight, or any future cause) -
+  // always instant, since these are corrections to the current resting
+  // value, not a new user gesture that should visibly glide.
+  if (window.ResizeObserver) {
+    var heightObserver = new ResizeObserver(function () { applyOffset(); });
+    if (topBar) { heightObserver.observe(topBar); }
+    heightObserver.observe(siteHeader);
+  }
+
+  // Dismissible announcement strip: .bar-close is currently a bare link to
+  // index.html with no actual dismiss behavior wired up. Intercept it so it
+  // collapses the top bar in place instead of navigating away.
+  var barClose = document.querySelector(".bar-close");
+  if (barClose && topBar) {
+    barClose.addEventListener("click", function (e) {
+      e.preventDefault();
+      topBar.classList.add("top-bar--dismissed");
+      applyOffset(DISMISS_MS, "ease");
+    });
+  }
+
+  function menuIsOpen() {
+    return document.body.classList.contains("showing-menu-modal");
+  }
+
+  // Stays visible while the mobile menu modal is open so it can't
+  // disappear mid-interaction.
+  function setHidden(next) {
+    if (next === isHidden) { return; }
+    isHidden = next;
+    // .top-bar's own hide/show transform still reads this class directly
+    // (see brand-redesign.css) - it doesn't depend on any measured value,
+    // so it isn't part of the single-source-of-truth offset above.
+    document.body.classList.toggle(HIDE_CLASS, isHidden);
+    applyOffset(SCROLL_MS, SCROLL_EASING);
+  }
+
+  var lastScrollY = window.scrollY;
+  var ticking = false;
+  var scriptStartTime = performance.now();
+  var RESTORE_SETTLE_WINDOW_MS = 500;
+
+  function onScroll() {
+    var currentScrollY = window.scrollY;
+    // On a reload, the browser can restore the previous scroll position
+    // asynchronously, slightly after this script runs - if that restore's
+    // own "scroll" event reaches here before lastScrollY reflects it, it
+    // would read as a big jump from the stale value this script started
+    // with, get treated as "scrolled down", and hide the header before the
+    // user has done anything. A brief real-time window (not "the first
+    // scroll event ever", which would also swallow a genuine first scroll
+    // from the user with no way to tell the difference) closes the race:
+    // only scroll events arriving this soon after the script started could
+    // plausibly be restoration rather than a human actually scrolling, so
+    // only those recalibrate instead of acting.
+    if (performance.now() - scriptStartTime < RESTORE_SETTLE_WINDOW_MS) {
+      lastScrollY = currentScrollY;
+      ticking = false;
+      return;
+    }
+    if (currentScrollY <= 0 || menuIsOpen()) {
+      setHidden(false);
+    } else if (currentScrollY > lastScrollY) {
+      setHidden(true);
+    } else if (currentScrollY < lastScrollY) {
+      setHidden(false);
+    }
+    lastScrollY = currentScrollY;
+    ticking = false;
+  }
+
+  window.addEventListener("scroll", function () {
+    if (!ticking) {
+      window.requestAnimationFrame(onScroll);
+      ticking = true;
+    }
+  }, { passive: true });
+})();
