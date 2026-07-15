@@ -1,0 +1,98 @@
+document.addEventListener("DOMContentLoaded",function(){var lazyVideos=[].slice.call(document.querySelectorAll("video.lazy"));if("IntersectionObserver" in window){var lazyVideoObserver=new IntersectionObserver(function(entries,observer){entries.forEach(function(video){if(video.isIntersecting){for(var source in video.target.children){var videoSource=video.target.children[source];if(typeof videoSource.tagName==="string"&&videoSource.tagName==="SOURCE"){videoSource.src=videoSource.dataset.src}}
+video.target.load();video.target.classList.remove("lazy");lazyVideoObserver.unobserve(video.target)}})});lazyVideos.forEach(function(lazyVideo){lazyVideoObserver.observe(lazyVideo)})}})
+
+// Slick carousel dot indicators: .slider__controls-dots .slick-dots (used by
+// the card slider, and reused as-is by the "Meet the Team" and "Latest Blog
+// Posts" sliders) has no fixed width in site.css - it's `display:flex` with
+// no width constraint, so it simply grows wider as more slides/dots are
+// added. Slick's own buildDots() never sets a size, only toggles the active
+// class, so today's dot circle size (site.css `.slick-dots li button`) is a
+// fixed value hand-tuned to look right for exactly 4 dots.
+// Rather than hardcode a size for "4" or "5" dots, this reads whatever size
+// the CSS already specifies at the current breakpoint (so nothing changes
+// for the common 4-dot case) and scales every dot in a given .slick-dots
+// list down together - by the same factor applied to both dot diameter and
+// li margin, so the gap:dot ratio stays visually identical, just smaller -
+// whenever more dots are present than the count that sizing was designed
+// for. This keeps the whole row's total width roughly constant instead of
+// letting it grow and overflow/wrap as slides are added.
+;(function () {
+  var REFERENCE_DOT_COUNT = 4; // the dot count site.css's hand-tuned sizing assumes
+  var MIN_DOT_PX = 8; // floor so dots never shrink to an imperceptible speck
+
+  function sizeDotsList(dotsList) {
+    var items = dotsList.querySelectorAll("li");
+    var count = items.length;
+    if (!count) { return; }
+
+    // Clear any previous override first so the getComputedStyle reads below
+    // reflect the real CSS-cascade value for the current breakpoint, not a
+    // stale inline size this same function left behind at a different
+    // viewport width.
+    for (var i = 0; i < count; i++) {
+      items[i].style.marginLeft = "";
+      items[i].style.marginRight = "";
+      var btn = items[i].querySelector("button");
+      if (btn) {
+        btn.style.width = "";
+        btn.style.height = "";
+      }
+    }
+
+    var firstButton = items[0].querySelector("button");
+    if (!firstButton) { return; }
+    var baseDotSize = parseFloat(getComputedStyle(firstButton).width);
+    var baseMargin = parseFloat(getComputedStyle(items[0]).marginRight);
+    if (!baseDotSize) { return; }
+
+    var idealSize = baseDotSize * (REFERENCE_DOT_COUNT / count);
+    // Never bigger than the CSS default (fewer than the reference count
+    // shouldn't make dots grow past their designed size) and never smaller
+    // than the legibility floor.
+    var dotSize = Math.min(baseDotSize, Math.max(MIN_DOT_PX, idealSize));
+    // Recompute the scale from the final (possibly floor-clamped) dot size
+    // so the margin always stays in the same proportion to the dot it's
+    // actually rendering next to.
+    var scale = dotSize / baseDotSize;
+    var margin = baseMargin * scale;
+
+    for (var j = 0; j < count; j++) {
+      items[j].style.marginLeft = margin + "px";
+      items[j].style.marginRight = margin + "px";
+      var button = items[j].querySelector("button");
+      if (button) {
+        button.style.width = dotSize + "px";
+        button.style.height = dotSize + "px";
+      }
+    }
+  }
+
+  function sizeAllDots() {
+    var lists = document.querySelectorAll(".slider__controls-dots .slick-dots");
+    for (var i = 0; i < lists.length; i++) {
+      sizeDotsList(lists[i]);
+    }
+  }
+
+  // Slick builds .slick-dots synchronously inside its own init, which (per
+  // the theme's js.js) runs from a deferred script loaded before this one -
+  // window.load guarantees that has already happened, matching the same
+  // timing approach already used elsewhere in this file for slick-dependent
+  // sizing.
+  window.addEventListener("load", sizeAllDots);
+
+  // Re-run on resize (throttled to one recalculation per frame) since the
+  // CSS default dot size itself is responsive and changes at breakpoints -
+  // reading it fresh each time (see the clear-then-read step above) keeps
+  // the scaled result correct at any viewport width.
+  var resizeTicking = false;
+  window.addEventListener("resize", function () {
+    if (!resizeTicking) {
+      window.requestAnimationFrame(function () {
+        sizeAllDots();
+        resizeTicking = false;
+      });
+      resizeTicking = true;
+    }
+  });
+})();
