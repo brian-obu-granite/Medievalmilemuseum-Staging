@@ -71,21 +71,21 @@
    recoloured to the new brand amber/gold/bronze tones. Those tones are much
    lighter than the old colours, so anywhere the theme paints white text on
    top of a coloured card/slide/button, that text needs to switch to the
-   brand near-black (#161412) to stay readable. The dark ("green") variant
-   is unaffected since near-black + white already has strong contrast.
+   brand near-black (#161412) to stay readable. The dark ("green"/now "navy")
+   variant is unaffected since near-black + white already has strong contrast.
    ========================================================================== */
-.lbs__item__card.red,
-.lbs__item__card.orange,
 .lbs__item__card.yellow,
-.lbs__item__card.purple,
 .lbs__item__card.blue,
 .slider__slide-link.blue {
   color: #161412 !important;
 }
 
-/* wine/plum/navy/forest (formerly yellow/orange/red/purple) got dark brand
-   colours instead of light amber ones, so they need light text instead of
-   the near-black used by the still-light lbs__item__card/blue variants above. */
+/* wine/plum/navy/forest (formerly yellow/orange/red/purple on
+   .slider__slide-link; formerly red/orange/green/purple on
+   .lbs__item__card - two unrelated components that happen to share this
+   same four-colour palette) got dark brand colours instead of light amber
+   ones, so they need light text instead of the near-black used by the
+   still-light lbs__item__card yellow/blue variants above. */
 .slider__slide-link.navy,
 .slider__slide-link.plum,
 .slider__slide-link.wine,
@@ -93,10 +93,7 @@
   color: #fff !important;
 }
 
-.lbs__item__card.red .lbs__item__card__heading,
-.lbs__item__card.orange .lbs__item__card__heading,
 .lbs__item__card.yellow .lbs__item__card__heading,
-.lbs__item__card.purple .lbs__item__card__heading,
 .lbs__item__card.blue .lbs__item__card__heading,
 .slider__slide-link.blue .slider__slide-heading {
   color: #161412 !important;
@@ -107,6 +104,31 @@
 .slider__slide-link.wine .slider__slide-heading,
 .slider__slide-link.forest .slider__slide-heading {
   color: #fff !important;
+}
+
+/* ==========================================================================
+   lbs__item__card: red/orange/green/purple renamed + recoloured to
+   wine/plum/navy/forest site-wide (51 class occurrences across 13 pages),
+   reusing the exact same hex values already established for
+   .slider__slide-link's wine/plum/navy/forest variants above, for palette
+   consistency across both components. site.css's own .red/.orange/.green/
+   .purple background-color rules are now dead code (nothing in the HTML
+   carries those classes any more) - left alone rather than edited directly,
+   same as everywhere else in this file. */
+.lbs__item__card.wine {
+  background-color: #781041;
+}
+
+.lbs__item__card.plum {
+  background-color: #5A305E;
+}
+
+.lbs__item__card.navy {
+  background-color: #013A57;
+}
+
+.lbs__item__card.forest {
+  background-color: #203A1D;
 }
 
 /* ==========================================================================
@@ -219,8 +241,8 @@
 }
 
 /* Quote box height: site.css leaves .quote_box's height entirely up to its
-   padding + content (no explicit height at all). Sized here to 990px at the
-   1920px design baseline - 990/1920 = 51.5625vw - scaling fluidly like
+   padding + content (no explicit height at all). Sized here to 900px at the
+   1920px design baseline - 900/1920 = 46.875vw - scaling fluidly like
    every other dimension above. Deliberately left unset again below the
    site's usual 1279px fluid/fixed switchover: .quote_box keeps
    overflow:hidden, and a 14-testimonial page has too much length variance
@@ -229,7 +251,7 @@
    breakpoint's current unstyled behaviour) is safer there than guessing a
    fixed value that isn't part of this request. */
 .quote_box {
-  height: 51.5625vw;
+  height: 46.875vw;
 }
 
 @media (max-width: 1279px) {
@@ -436,6 +458,25 @@
     width: 44px;
     height: 44px;
   }
+}
+
+/* Second homepage video section: site.css sizes .embed-responsive purely
+   via an aspect-ratio padding-top trick (42.3% of width, no explicit
+   height), which this overrides with a fixed 900px at the 1920px baseline
+   (900/1920 = 46.875vw) - fluid like every other dimension above, and with
+   no 1279px breakpoint fallback since (unlike .quote_box) a video has no
+   text content that risks overflowing/clipping at a fixed height.
+   Overriding the height independently of width means the container's own
+   aspect ratio no longer matches the video's native aspect ratio at most
+   viewport widths, so object-fit:cover is added (the same technique
+   site.css already uses on the hero's own video) to crop rather than
+   stretch/distort it. */
+.embed-responsive {
+  height: 46.875vw;
+}
+
+.embed-responsive video {
+  object-fit: cover;
 }
 
 /* ==========================================================================
