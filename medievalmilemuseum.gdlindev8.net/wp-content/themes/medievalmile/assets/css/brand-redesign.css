@@ -109,13 +109,223 @@
   color: #fff !important;
 }
 
-/* NOTE for full-site rollout: .quote_box__bg uses the same variant classes
-   (red/orange/yellow/purple/blue) but the heading text lives in a sibling
-   element, not a descendant, so it can't be scoped the same way here. The
-   homepage only uses the dark ("green") quote box variant, which is fine
-   as-is. If a lighter quote box variant is used on another page, its
-   .quote_box__heading / .quote_box__sub-heading text will need a manual
-   dark-text override at that point. */
+/* ==========================================================================
+   Quote box: one unified look across all 24 instances site-wide
+   .quote_box__bg previously had 6 color variants (red/orange/yellow/green/
+   purple/blue) applied per-page via a second class - 21 instances used the
+   dark "green" variant, 3 used "purple" (in reality a gold/tan color, not
+   purple) with the same hardcoded white heading/sub-heading text, which read
+   poorly against it. Replacing all 6 variants with a single background color
+   and matching text color removes that inconsistency instead of patching it
+   per-variant. Matches every `.quote_box__bg.<variant>` selector's own
+   specificity so this wins on source order alone, no !important needed.
+   ========================================================================== */
+.quote_box__bg.red,
+.quote_box__bg.orange,
+.quote_box__bg.yellow,
+.quote_box__bg.green,
+.quote_box__bg.purple,
+.quote_box__bg.blue {
+  background-color: #EAAC00;
+}
+
+.quote_box__heading,
+.quote_box__sub-heading {
+  color: #000000;
+}
+
+/* Two decorative corner shapes instead of the original single top-right
+   shape image (the HTML now has two <img> tags per instance, sharing the
+   base .quote_box__shape rule from site.css for position:absolute/z-index/
+   object-fit, distinguished by one of these two modifier classes for which
+   corner they anchor to). site.css's base rule sizes the shape at
+   height:100%/width:100% with mix-blend-mode:multiply - tuned for the
+   original abstract diamond-pattern shape as a subtle full-height background
+   texture. Wolf.svg/Pig.svg are detailed character illustrations, not an
+   abstract pattern, so at that size and blend mode they read as an oversized,
+   muddy mess overlapping the text. Both are overridden here with normal
+   blending and their own fluid size instead.
+   Sizing is vw-based (not fixed px), matching every other fluid dimension
+   in site.css, all of which resolve cleanly against a 1920px design
+   baseline (e.g. .quote_box__inner's 51.04167vw === 980px at 1920px - the
+   same 980px used in its own sub-1280px fixed override). Pig.svg is sized
+   to 580.8x283.14 and Wolf.svg to 616x506 at that 1920px baseline (the
+   original 480x234 scaled up 10% twice for Pig.svg; Wolf.svg's original
+   560x460 scaled up 10% once):
+     580.8/1920 = 30.25vw    283.14/1920 = 14.74688vw
+     616/1920 = 32.08333vw   506/1920 = 26.35417vw
+   Using vw for both dimensions (rather than vw+vh or a fixed aspect-ratio)
+   keeps each image scaling proportionally at any viewport width, matching
+   how site.css itself scales things - width and height move together
+   automatically since both are the same unit.
+   site.css's own responsive rule for the old single-shape design pulls
+   .quote_box__shape to the bottom edge below 1279px (originally so the one
+   shape wouldn't overlap the heading on shorter mobile layouts) - that would
+   incorrectly drag the top-right shape down too, so it's pinned back to the
+   top corner here at the same breakpoint. The bottom-left shape already
+   belongs at the bottom, so site.css's own rule is left alone for it. */
+.quote_box__shape--top-right,
+.quote_box__shape--bottom-left {
+  mix-blend-mode: normal;
+}
+
+.quote_box__shape--top-right {
+  top: 1px;
+  right: -1px;
+  bottom: auto;
+  left: auto;
+  width: 30.25vw;
+  height: 14.74688vw;
+  object-position: right top;
+}
+
+.quote_box__shape--bottom-left {
+  top: auto;
+  right: auto;
+  bottom: 1px;
+  left: -1px;
+  width: 32.08333vw;
+  height: 26.35417vw;
+  object-position: left bottom;
+}
+
+@media (max-width: 1279px) {
+  .quote_box__shape--top-right {
+    top: 1px;
+    bottom: auto;
+  }
+}
+
+/* Testimonial copy: site.css hardcodes white text (tuned for the old dark
+   "green" background) - unreadable now that .quote_box__bg is gold. */
+.quote_box__description p {
+  color: #000000;
+}
+
+/* "More Testimonials" CTA: same white-on-dark assumption as the copy above.
+   .btn-link--white is a shared site-wide link style (footer, other dark
+   sections), so this is scoped to .quote_box__btn rather than changed
+   globally. The arrow icon is a white SVG (btn-link-arow-white.svg); rather
+   than add a black-arrow asset, this reuses the site's own existing
+   technique for recoloring an arrow icon to black (see .btn-link--pink:after
+   in site.css, which loads a colour SVG then flattens it with the same
+   filter) instead of introducing a new one-off approach. */
+.quote_box__btn .btn-link--white {
+  color: #000000;
+}
+
+.quote_box__btn .btn-link--white:after {
+  filter: brightness(0);
+}
+
+/* Quote box height: site.css leaves .quote_box's height entirely up to its
+   padding + content (no explicit height at all). Sized here to 990px at the
+   1920px design baseline - 990/1920 = 51.5625vw - scaling fluidly like
+   every other dimension above. Deliberately left unset again below the
+   site's usual 1279px fluid/fixed switchover: .quote_box keeps
+   overflow:hidden, and a 14-testimonial page has too much length variance
+   for one fixed mobile height to fit every instance without clipping text -
+   letting height fall back to auto (content-driven, matching every other
+   breakpoint's current unstyled behaviour) is safer there than guessing a
+   fixed value that isn't part of this request. */
+.quote_box {
+  height: 51.5625vw;
+}
+
+@media (max-width: 1279px) {
+  .quote_box {
+    height: auto;
+  }
+}
+
+/* ==========================================================================
+   Quote box: single-column layout (headline -> copy -> attribution -> CTA),
+   replacing the old block plus large corner quote-mark decorations.
+   Everything in the stack is left-aligned within .quote_box__inner.
+
+   Old decorations removed: site.css draws two big quote-mark glyphs as
+   .quote_box:before/:after background-images (icon-quote-left.svg top-left,
+   icon-quote-right.svg bottom-right, at ~300-480px) - a different
+   decorative language than the icon treatment used now, so both are
+   hidden. (Both source files have since been deleted from dist/images -
+   only the display:none override lives on here.)
+
+   New icon: uses dist/images/icon-quote.svg (native 107x87, a dedicated
+   small closing-quote glyph - distinct from the two large corner assets
+   above, and confirmed by rendering it directly to be the same "99"-style
+   mark shown in the reference). Sized to 260x213 at the 1920px baseline
+   (260/1920=13.54167vw, 213/1920=11.09375vw), matching the asset's own
+   native 107:87 aspect ratio so it doesn't distort.
+
+   The icon sits BEHIND the headline text, overlapping its top-left corner
+   (per the reference), rather than taking its own space above it - so
+   it's attached as .quote_box__heading:before instead of living on
+   .quote_box__inner. Position offsets (top:-5vw; left:-10vw, i.e. -96px/
+   -192px at baseline) are relative to the heading's own box, not the
+   container - the heading already recenters vertically along with
+   everything else via .quote_box__inner's flex centering (different
+   testimonials produce different total stack heights), so anchoring the
+   icon to .quote_box__inner directly with a fixed offset would drift out
+   of alignment with the heading text on shorter/taller instances; anchoring
+   to the heading itself means the icon always moves together with it.
+   z-index:-1 paints it behind .quote_box__heading's own static in-flow
+   text content (negative z-index descendants paint before/behind normal
+   in-flow content within the same stacking context - .quote_box__heading
+   needs position:relative for that z-index to take effect at all, with no
+   top/left of its own so it doesn't otherwise move). The heading's own
+   text color is opaque solid black, so legibility is unaffected regardless
+   of how much of the icon it overlaps. It's pure decoration (content:"",
+   no text) - already outside the accessibility tree and non-interactive by
+   default, no extra ARIA needed.
+
+   Layout: .quote_box__inner already gets margin:0 auto and a max-width
+   from the shared .container class, so it's already horizontally centered
+   between the corner artwork - align-items isn't set here (defaults to
+   stretch), so the heading/copy/attribution/CTA each stretch to that full
+   width and left-align via text-align. height:100% + justify-content:center
+   centers the stack vertically within .quote_box's own fixed height (falls
+   back to normal flow when .quote_box's height reverts to auto below
+   1279px, since a percentage height against an auto-height parent
+   computes as auto too).
+   ========================================================================== */
+.quote_box:before,
+.quote_box:after {
+  display: none;
+}
+
+.quote_box__inner {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: left;
+}
+
+.quote_box__heading {
+  position: relative;
+}
+
+.quote_box__heading:before {
+  content: "";
+  display: block;
+  position: absolute;
+  z-index: -1;
+  top: -5vw;
+  left: -10vw;
+  width: 13.54167vw;
+  height: 11.09375vw;
+  background-image: url(../../dist/images/icon-quote.svg);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+}
+
+/* .quote_box__description already gets margin:0 2.60417vw 0 0 from site.css
+   (reserving space for the old top-right corner glyph) - centered text
+   doesn't need that lopsided margin. */
+.quote_box__description {
+  margin: 0;
+}
 
 /* ==========================================================================
    Homepage hero: undo the parent theme's slick fade-in gate
