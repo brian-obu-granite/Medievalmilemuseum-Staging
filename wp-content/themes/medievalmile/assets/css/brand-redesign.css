@@ -131,6 +131,50 @@
   background-color: #203A1D;
 }
 
+/* Background illustration per variant, including the pre-existing yellow
+   variant (not part of the wine/plum/navy/forest rename above - it kept
+   its original site.css background-color and never had an illustration).
+   Applied as a CSS background-image rather than an <img> element since
+   this component has no image/figcaption slot in its markup to hold one
+   (unlike .slider__slide-link's <img class="card-shape">) - backgrounds
+   always paint behind an element's text content, so this needs no
+   z-index or position changes to the heading/arrow-icon to stay layered
+   correctly. Sized auto-width/100%-height and pinned to the right edge,
+   mirroring the height:100%/object-fit:contain convention used for the
+   .slider__slide-link shapes; these "-v2" files are the same 4
+   diamond/chevron designs re-cut narrower (87px vs 124-126px wide) to
+   suit this shorter, more compact card, plus a new matching amber/gold
+   design (box-shape5-v2.svg) for yellow. */
+.lbs__item__card.wine,
+.lbs__item__card.plum,
+.lbs__item__card.navy,
+.lbs__item__card.forest,
+.lbs__item__card.yellow {
+  background-repeat: no-repeat;
+  background-position: right center;
+  background-size: auto 100%;
+}
+
+.lbs__item__card.wine {
+  background-image: url(../../dist/images/box-shape1-%20v2.svg);
+}
+
+.lbs__item__card.plum {
+  background-image: url(../../dist/images/box-shape2-%20v2.svg);
+}
+
+.lbs__item__card.navy {
+  background-image: url(../../dist/images/box-shape3-%20v2.svg);
+}
+
+.lbs__item__card.forest {
+  background-image: url(../../dist/images/box-shape4-%20v2.svg);
+}
+
+.lbs__item__card.yellow {
+  background-image: url(../../dist/images/box-shape5-%20v2.svg);
+}
+
 /* ==========================================================================
    Newsletter section (.nl): one unified look across all 20 instances
    site-wide. Was inconsistent two ways: 18 pages used the "blue" variant
@@ -778,4 +822,100 @@ body .nl__right .gform_wrapper form .gform_body .gform_fields .gfield .ginput_co
     font-size: 1.04167vw;
     line-height: 1.5;
   }
+}
+
+/* ==========================================================================
+   Desktop nav dropdown (.sub-menu under the header's primary menu - the
+   "What's On"/"Explore"/etc flyouts). site.css's own selector chain is 7
+   classes deep, so the override matches that exact chain rather than a
+   shorter one, which would lose on specificity and silently fail to apply.
+   Was the old rainbow gold (#F3B100) with near-black text; recoloured to a
+   black background with white text. The little pointer triangle
+   (.sub-menu:after) is recoloured to match so it doesn't stay gold against
+   the new black panel. The divider between items was solid white
+   (border-bottom:1px solid #fff) - changed to 50% opacity so it reads as a
+   subtle separator against the new dark background instead of a hard line. */
+.header-footer-group .header-inner .header-navigation-wrapper .primary-menu-wrapper .primary-menu > .menu-item .sub-menu {
+  background-color: #000000;
+}
+
+.header-footer-group .header-inner .header-navigation-wrapper .primary-menu-wrapper .primary-menu > .menu-item .sub-menu:after {
+  border-bottom-color: #000000;
+}
+
+.header-footer-group .header-inner .header-navigation-wrapper .primary-menu-wrapper .primary-menu > .menu-item .sub-menu .menu-item {
+  border-bottom-color: rgba(255, 255, 255, 0.5);
+}
+
+.header-footer-group .header-inner .header-navigation-wrapper .primary-menu-wrapper .primary-menu > .menu-item .sub-menu .menu-item a {
+  color: #ffffff;
+}
+
+/* ==========================================================================
+   Site-wide accent color swap: #E4A404 -> #EAAC00, every place site.css
+   uses it. Matches each selector's own exact chain (some run 5-6 classes
+   deep) since a shorter override would lose on specificity and silently
+   fail to apply.
+   #E4A404 also appears in several site.css rules that are dead code (no
+   element in any page's HTML actually carries the class combination they
+   target - .quote_box__bg/.nl/.cgw__card__copy/.cta__bg's .orange/.yellow
+   variants, .cg__card__copy .copybg.orange/.yellow, .lbs__item__card.orange,
+   and the .teaminfo team-bio rules, which no page uses at all): left alone
+   rather than styling selectors that can never match anything, same as
+   elsewhere in this file. */
+.header-footer-group .header-inner .header-titles-wrapper .nav-toggle {
+  background-color: #eaac00;
+}
+
+.header-footer-group .header-inner .header-navigation-wrapper .primary-menu-wrapper .primary-menu > .menu-item > a:after {
+  background-color: #eaac00;
+}
+
+.site-footer__col .menu .menu-item .sub-menu > .menu-item.current-menu-item > a {
+  color: #eaac00;
+}
+
+.site-footer__col .menu .menu-item .sub-menu > .menu-item a:hover {
+  color: #eaac00;
+}
+
+.site-footer__copy p a:hover {
+  color: #eaac00;
+}
+
+.site-footer__sl__social li a:hover {
+  color: #eaac00;
+}
+
+.site-footer__fb__menu .menu-footer-bottom-menu-container .menu .menu-item.current-menu-item a {
+  color: #eaac00;
+}
+
+.site-footer__fb__menu .menu-footer-bottom-menu-container .menu .menu-item a:hover {
+  color: #eaac00;
+}
+
+.site-footer__fb__copyright p a:hover {
+  color: #eaac00;
+}
+
+.hero .slick-arrow {
+  color: #eaac00;
+}
+
+.hero .slick-dots li.slick-active button {
+  background-color: #eaac00;
+  border-color: #eaac00;
+}
+
+.hero .slick-dots li button {
+  border-color: #eaac00;
+}
+
+.lbs__item__card.yellow {
+  background-color: #eaac00;
+}
+
+.cta__bottom_info p a:hover {
+  color: #eaac00;
 }
