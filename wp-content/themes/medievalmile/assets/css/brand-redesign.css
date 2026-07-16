@@ -519,6 +519,28 @@ body .nl__right .gform_wrapper form .gform_body .gform_fields .gfield .ginput_co
   background-size: contain;
 }
 
+/* Mobile: the desktop offset (top:-5vw; left:-10vw) is relative to the
+   heading's own box, which stretches to the full width of .quote_box__inner
+   at every width - on a narrow phone viewport that shifted the icon mostly
+   off the left edge of the screen instead of just tucking behind the
+   text's top-left corner like it does at desktop widths. Repositioned
+   above the heading instead, centered horizontally within the heading's
+   own box (left:50% + translateX(-50%)) rather than overlapping it -
+   .quote_box's own 161px top padding (site.css, unchanged) comfortably
+   fits the icon's height plus a gap above the heading, so nothing clips
+   against .quote_box's overflow:hidden. z-index stays -1 - harmless now
+   that it no longer overlaps text, kept for consistency with the desktop
+   rule above. */
+@media (max-width: 1279px) {
+  .quote_box__heading:before {
+    top: -85px;
+    left: 50%;
+    width: 90px;
+    height: 73px;
+    transform: translateX(-50%);
+  }
+}
+
 /* .quote_box__description already gets margin:0 2.60417vw 0 0 from site.css
    (reserving space for the old top-right corner glyph) - centered text
    doesn't need that lopsided margin. */
@@ -840,8 +862,12 @@ body .nl__right .gform_wrapper form .gform_body .gform_fields .gfield .ginput_co
    wins on load order.
    Desktop: 18.1974vw = default figcaption height (card 33.7882vw - image
    15.59109vw), all vw so it holds across the desktop range.
-   Mobile: figcaption is a fixed 250px, image fixed-px - so fixed 180px for
-   card-shape-right (72% of 250) and 250px for card-shape-bottom. */
+   Mobile: figcaption is a fixed 202px (card 390px - image 188.25726px,
+   measured live), so both variants share that same fixed 202px - old
+   180px/250px values were leftovers from site.css's percentage system
+   (72%/100% of a stale 250px figcaption estimate) and never matched each
+   other, which is what caused the shape to render at inconsistent sizes
+   across cards on mobile. */
 .slider__slide-image figcaption .card-shape-right,
 .slider__slide-image figcaption .card-shape-bottom {
   height: 18.1974vw;
@@ -856,17 +882,31 @@ body .nl__right .gform_wrapper form .gform_body .gform_fields .gfield .ginput_co
     font-size: 18px;
   }
 
+  /* 4. Hover-reveal disabled on mobile: mobile users tap through rather
+     than hover, and touch browsers can still momentarily register :hover
+     on tap, which would otherwise trigger this same collapse/reveal
+     sequence for an instant. Resetting the three hover-triggered selectors
+     back to their own default (non-hover) values - same bucket as every
+     other mobile-only override in this file - neutralizes the animation
+     entirely on mobile while leaving the unscoped desktop :hover rules
+     above untouched. */
+  .slider__slide-link:hover .slider__slide__img {
+    height: 188.25726px;
+  }
+
+  .slider__slide-link:hover .slider__slide__img img {
+    opacity: 1;
+  }
+
   .slider__slide-link:hover .slider__slide-description {
-    max-height: 120px;
-    margin-bottom: 50px;
+    max-height: 0;
+    opacity: 0;
+    margin-bottom: 0;
   }
 
-  .slider__slide-image figcaption .card-shape-right {
-    height: 180px;
-  }
-
+  .slider__slide-image figcaption .card-shape-right,
   .slider__slide-image figcaption .card-shape-bottom {
-    height: 250px;
+    height: 202px;
   }
 }
 
@@ -1073,4 +1113,66 @@ body .nl__right .gform_wrapper form .gform_body .gform_fields .gfield .ginput_co
   .slider__slide-heading {
     min-height: 96px;
   }
+}
+
+/* ==========================================================================
+   Mobile responsiveness pass.
+   ========================================================================== */
+
+/* 1. Inner-page hero contrast: .page-banner__copy (used by every inner
+   page's hero banner - NOT the homepage, which uses the separate .hero
+   component) switches to a solid yellow background (#F3B100) only at
+   <=767px, but its h1/description text stays site.css's default white,
+   making it illegible. The homepage's own .hero__item__copy already
+   patches this exact scenario for itself (color:#161412!important at
+   this same breakpoint) - .page-banner__copy never got the same
+   treatment. Matches that established near-black, scoped to mobile only
+   so the desktop hero (image background, white text over a dark
+   gradient) is untouched. */
+@media (max-width: 767px) {
+  .page-banner__copy h1,
+  .page-banner__copy__description p {
+    color: #161412;
+    text-shadow: none;
+  }
+}
+
+/* 2. Root cause of "cards/hero text cropped/overlapped by the section
+   above it" on mobile: the fixed nav header (site.css:
+   .header-footer-group{position:absolute!important;
+   background-color:transparent!important}, switched to position:fixed
+   by a "fixed" class the theme's own JS adds on scroll) never gets a
+   solid background - site.css DOES define
+   .header-footer-group.header-visible{background-color:#161412} for
+   exactly this "solid once scrolled" state, but no script in this theme
+   ever applies the .header-visible class, so the header stays
+   permanently transparent while pinned on top of the page. Whatever has
+   scrolled up underneath it - the hero heading, or the top of the card
+   carousel further down - shows straight through and visually collides
+   with the header's own logo/buttons, reading as "cropped by the
+   section above." Scoped to mobile only, and to the header element
+   specifically (.menu-modal - the slide-out mobile nav panel, which
+   shares the same header-footer-group.fixed classes - already gets its
+   own solid #161412 background from .menu-modal-inner, so it's
+   unaffected by this selector). */
+@media (max-width: 767px) {
+  header.header-footer-group.fixed {
+    background-color: #161412 !important;
+  }
+}
+
+/* 6. Mobile hamburger menu: site.css hardcodes the active-page link color
+   AND the tap/hover link color to literal `red` (not a brand variable) -
+   .menu-item.current-menu-item.current_page_item .ancestor-wrapper a and
+   .ancestor-wrapper a:hover. Touch browsers commonly apply :hover on tap,
+   which is exactly the "What's On expanded" state in the report - tapping
+   the item to expand its sub-menu triggers the :hover rule the same as a
+   desktop mouse hover would. Same selectors as site.css (so this wins on
+   load order) with the site's brand yellow instead of red. Not scoped to a
+   width breakpoint - .menu-modal only exists in the DOM/off-canvas at all
+   viewport widths but is only ever visually reachable via the mobile
+   hamburger toggle, so no separate media query is needed. */
+.menu-modal .menu-modal-inner .menu-wrapper .menu-top .mobile-menu .modal-menu .menu-item.current-menu-item.current_page_item .ancestor-wrapper a,
+.menu-modal .menu-modal-inner .menu-wrapper .menu-top .mobile-menu .modal-menu .menu-item .ancestor-wrapper a:hover {
+  color: #EAAC00;
 }
