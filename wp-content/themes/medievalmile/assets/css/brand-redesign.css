@@ -813,13 +813,35 @@ body .nl__right .gform_wrapper form .gform_body .gform_fields .gfield .ginput_co
    .quote_box__description / .slider__copy__description / .nl__description
    variants that re-declare it - NOT to the buttons, sub-headings, nav items
    or form inputs that also happen to use 1.14583vw (those aren't body copy). */
+/* Two-segment fluid ramp instead of one flat ratio, so body copy hits
+   three exact anchor points: 16px@1280, 18px@1440, 20px@1920. A single
+   vw ratio can't pass through all three (16/1280 and 18/1440 share the
+   same ratio, 1.25vw, but 20/1920 doesn't match that ratio) - so this is
+   two linear segments instead: 1.25vw handles 1280-1440 (a pure ratio,
+   since 16/1280 == 18/1440), and 12px + 0.41667vw handles 1440 and up
+   (18 at 1440, 20 at 1920, continuing the same slope beyond). Both
+   media queries match at >=1440px; the second wins there since it's
+   later in source order at equal specificity, leaving the first rule
+   in effect only for 1280-1439px. The two formulas agree exactly at
+   1440px (18px both ways), so there's no jump at the handoff. */
 @media (min-width: 1280px) {
   p,
   .ic__description p,
   .quote_box__description p,
   .slider__copy__description p,
   body .nl__description {
-    font-size: 1.04167vw;
+    font-size: 1.25vw;
+    line-height: 1.5;
+  }
+}
+
+@media (min-width: 1440px) {
+  p,
+  .ic__description p,
+  .quote_box__description p,
+  .slider__copy__description p,
+  body .nl__description {
+    font-size: calc(12px + 0.41667vw);
     line-height: 1.5;
   }
 }
@@ -918,4 +940,58 @@ body .nl__right .gform_wrapper form .gform_body .gform_fields .gfield .ginput_co
 
 .cta__bottom_info p a:hover {
   color: #eaac00;
+}
+
+/* ==========================================================================
+   Contact form (#gform_2, unique to contact/index.html - no other page
+   embeds this form) consent checkbox: recoloured from yellow to black for
+   better contrast/accessibility. The real <input type=checkbox> is
+   invisible (opacity:0) - site.css draws the visible box and checkmark
+   entirely with :before/:after pseudo-elements on the adjacent <label>, so
+   both need overriding. Scoped to this one form via the #gform_2 ID
+   (higher specificity than site.css's bare .ginput_container selector, so
+   no !important needed) rather than changing the shared
+   .ginput_container input[type=checkbox] rule site-wide, since ~20 other
+   pages reuse that same generic selector for their own consent checkboxes
+   and weren't part of this request. */
+#gform_2 .ginput_container input[type=checkbox]:checked + label:after,
+#gform_2 .ginput_container input[type=checkbox]:not(:checked) + label:after {
+  border-color: #161412;
+}
+
+#gform_2 .ginput_container input[type=checkbox]:checked + label:before {
+  border-color: transparent #161412 #161412 transparent;
+}
+
+/* ==========================================================================
+   Slider card titles (.slider__slide-heading, the "Guided Museum Tour" /
+   "Medieval Mile Trail" / etc cards): capped at 2 lines max. site.css
+   originally reserved height for 3 lines (min-height:7.5vw desktop /
+   144px mobile, at line-height 1.25) - the actual bug was in the HTML, not
+   the CSS: "Guided Museum Tour" had a manual <br> after every single word
+   ("Guided<br>Museum<br>Tour"), hard-forcing 3 lines regardless of screen
+   size, unlike its sibling titles which use at most one manual break.
+   That's fixed by removing the extra break. -webkit-line-clamp:2 is added
+   here as a structural safety net per the request, so any future CMS
+   title that's too long to fit 2 lines at this font-size truncates with
+   an ellipsis instead of overflowing to a 3rd line - the current titles
+   (Guided Museum Tour, Medieval Mile Trail, Events & Exhibitions,
+   Education, Primary/Secondary/Third Level School Tours, Language
+   Schools) all already fit in 2 lines at the existing font-size once the
+   stray <br> is gone, so no font-size/width change was needed for them.
+   min-height is reduced from 3 lines' worth to 2 lines' worth (same
+   proportional buffer as site.css's own 3-line values) so 1-line titles
+   don't reserve more empty space than the new 2-line design calls for. */
+.slider__slide-heading {
+  min-height: 5vw;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+@media (max-width: 1279px) {
+  .slider__slide-heading {
+    min-height: 96px;
+  }
 }
