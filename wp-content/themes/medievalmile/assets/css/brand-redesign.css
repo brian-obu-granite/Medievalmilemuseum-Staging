@@ -131,6 +131,85 @@
   background-color: #203A1D;
 }
 
+/* .cg__card__copy (the "Plan Your Visit" page cards) renamed from
+   .blue to .navy on plan-your-visit/index.html: the class was already
+   named wrong for what it rendered - .blue resolves to site.css's light
+   gold #F5CB5C (the same token the newsletter's old "blue" variant used
+   pre-unification), not an actual blue. This component shares its
+   card-shape/copybg markup pattern with .slider__slide-link (an <img
+   class="card-shape"> plus a .copybg colour layer), NOT with
+   .lbs__item__card (which has no image slot and gets its shape via a
+   background-image instead) - so it reuses .slider__slide-link.navy's
+   original box-shapes-3.svg asset here, not the narrower box-shape3-v2.svg
+   cut specifically for .lbs__item__card's shorter card. The navy hex
+   itself (#013A57) is the same token already established above and on
+   .slider__slide-link.navy, reused for palette consistency. Only
+   plan-your-visit/index.html used .cg__card__copy.blue (4 instances) -
+   admission-opening-hours/index.html's matching cards use .red instead,
+   untouched here. */
+.cg__card__copy .copybg.navy {
+  background-color: #013A57;
+}
+
+/* site.css's base .card-shape (which this component's shape <img> uses,
+   having no -right/-bottom modifier of its own) carries
+   mix-blend-mode:multiply;opacity:.25 - tuned for this component's
+   lighter purple/gray backgrounds, where a faint multiplied overlay
+   reads as a subtle texture. Against dark backgrounds it's nearly
+   invisible instead: the shape SVGs' own fills are close to (navy) or
+   identical to (wine) the copybg colour they sit on, so multiplying them
+   together barely moves the result. Overridden to full opacity/normal
+   blending for both dark variants here, matching how
+   .slider__slide-link's own dark wine/plum/navy/forest variants already
+   override their card-shape-right/-bottom the same way - scoped to just
+   these cards so the purple/gray variants (whose lighter backgrounds
+   make the subtle multiply treatment work fine) keep their existing
+   look. */
+.cg__card__copy.navy .card-shape,
+.cg__card__copy.wine .card-shape {
+  mix-blend-mode: normal;
+  opacity: 1;
+}
+
+/* .cg__card__copy.red renamed -> .wine (admission-opening-hours/index.html,
+   4 instances - the only page using this variant of the component) for
+   the same reason as .blue -> .navy above: .red resolves to site.css's
+   light gold #F3B100, mismatched against the class name. Reuses the wine
+   hex already established for .lbs__item__card.wine/.slider__slide-link.wine.
+   The shape asset was already box-shapes-1.svg in the markup (the correct
+   wine-equivalent file, matching .slider__slide-link.wine's own shape) -
+   no asset change was needed, just the blend-mode fix above. */
+.cg__card__copy .copybg.wine {
+  background-color: #781041;
+}
+
+/* .cgw__card__copy (the "About the Museum" / "Getting Here" cards further
+   down the same Plan Your Visit page) renamed .blue -> .navy the same
+   way as .cg__card__copy above: .blue resolves to site.css's light gold
+   #F5CB5C, mismatched against the class name, and both instances are
+   unique to this page (its companion .cgw__card__link overlay - the
+   invisible full-card <a> - also carried a .blue class purely for
+   naming consistency; it has no CSS of its own tied to that class, so
+   renaming it to .navy alongside .cgw__card__copy is cosmetic/harmless
+   but keeps the markup's variant naming consistent). This component has
+   no card-shape/copybg image layer at all (unlike .cg__card__copy), so
+   there's no shape asset to update here.
+   site.css's .cgw__card__heading has an UNCONDITIONAL color:#000,
+   applied regardless of which background variant is active - fine
+   against the light red/orange/purple/yellow/blue/gray backgrounds, but
+   would make the heading illegible (black on navy) against this new dark
+   variant, the same problem site.css already has for its own .green
+   variant. Overridden to white here, matching how every other
+   dark-background variant across the site (wine/plum/navy/forest
+   elsewhere) already gets white heading text. */
+.cgw__card__copy.navy {
+  background-color: #013A57;
+}
+
+.cgw__card__copy.navy .cgw__card__heading {
+  color: #ffffff;
+}
+
 /* Background illustration per variant, including the pre-existing yellow
    variant (not part of the wine/plum/navy/forest rename above - it kept
    its original site.css background-color and never had an illustration).
