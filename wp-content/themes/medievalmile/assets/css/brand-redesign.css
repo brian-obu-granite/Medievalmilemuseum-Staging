@@ -300,6 +300,19 @@ body .nl__right .gform_wrapper form .gform_body .gform_fields .gfield .ginput_co
   box-shadow: none !important;
 }
 
+/* "Join now" CTA: site.css's default state is already overridden to black
+   elsewhere (`body .nl__right .gform_wrapper form .gform_footer input`),
+   but its own `:hover` state (same file) separately sets
+   background-color:#F3B100 - the same yellow as .nl's own background,
+   so the button nearly disappears into the section on hover. Overridden
+   back to black so the button's color doesn't change on hover at all;
+   the shared `.gform_button:hover`/`.btn:hover` scale-up transform is a
+   different selector and is untouched. Matches site.css's own selector
+   chain so it wins on specificity, not just load order. */
+body .nl__right .gform_wrapper form .gform_footer input:hover {
+  background-color: #000000;
+}
+
 /* ==========================================================================
    Quote box: one unified look across all 24 instances site-wide
    .quote_box__bg previously had 6 color variants (red/orange/yellow/green/
@@ -500,6 +513,26 @@ body .nl__right .gform_wrapper form .gform_body .gform_fields .gfield .ginput_co
   }
 }
 
+/* Mobile: center the text stack (heading, copy, attribution, CTA) instead
+   of left-aligning it. Scoped to .quote_box__inner only, so the Pig/Wolf
+   corner illustrations (.quote_box__shape--top-right/--bottom-left,
+   absolutely positioned against .quote_box itself, entirely independent of
+   this flex column) are untouched - text-align has no effect on an
+   absolutely positioned sibling's own top/right/bottom/left offsets.
+   .quote_box__btn shares .ic__btn, which is display:flex (site.css) - a
+   flex container's own children ignore text-align for their main-axis
+   position, so it needs justify-content:center in addition to inherit the
+   same centered look as the rest of the stack. */
+@media (max-width: 1279px) {
+  .quote_box__inner {
+    text-align: center;
+  }
+
+  .quote_box__btn {
+    justify-content: center;
+  }
+}
+
 .quote_box__heading {
   position: relative;
 }
@@ -563,6 +596,22 @@ body .nl__right .gform_wrapper form .gform_body .gform_fields .gfield .ginput_co
   visibility: visible;
 }
 
+/* The GRANDPARENT theme's own style.css (loaded before site.css and this
+   file) separately caps .section-hero > .hero at max-height:480px at
+   <=767px - a leftover slick-carousel assumption from the same
+   adaptiveHeight-era design .hero__item's height fix above already
+   explains, just one level higher up the tree. With slick gone, nothing
+   ever needed that cap to stay at exactly the video's own height, but the
+   copy block now stacked below the video (a normal-flow, content-sized
+   yellow block) still overflowed past it, invisible until whatever
+   section came next painted over the tail end. Same fix, same reason, one
+   level up: let it size to its actual content instead. */
+@media (max-width: 767px) {
+  .section-hero > .hero {
+    max-height: none;
+  }
+}
+
 /* ==========================================================================
    Homepage hero: single autoplaying video + pause/play toggle
    The hero carousel was reduced to a single slide, and its background image
@@ -592,9 +641,24 @@ body .nl__right .gform_wrapper form .gform_body .gform_fields .gfield .ginput_co
   }
 }
 
+/* At <=767px specifically, site.css switches .hero__item__img__wrapper to
+   position:inherit;height:480px (a literal px value, not a percentage) and
+   .hero__item__copy to a solid-yellow, normal-flow block stacked below it
+   (rather than absolutely overlaid on the video like at wider widths) - so
+   .hero__item no longer needs an explicit height for the video wrapper's
+   sake at all. Forcing one anyway (the 480px above, inherited from the
+   1279px rule if left unset) hard-capped the WHOLE .hero__item box at
+   exactly the video's own height, so the copy block stacked after it had
+   nowhere to go: it kept rendering (overflow is visible, never clipped),
+   but past the box's own bottom edge - which is also where .hero__item's
+   height ends and the NEXT section begins, so that section's own
+   background painted straight over the tail end of the copy block with no
+   gap. Reverting to auto here lets .hero__item grow to fit both the video
+   area and the copy block stacked beneath it, so whatever comes after gets
+   pushed down to the correct place. */
 @media (max-width: 767px) {
   .hero__item {
-    height: 480px;
+    height: auto;
   }
 }
 
@@ -605,6 +669,16 @@ body .nl__right .gform_wrapper form .gform_body .gform_fields .gfield .ginput_co
   max-width: 100% !important;
   object-fit: cover !important;
   object-position: center !important;
+}
+
+/* Homepage hero copy block (mobile): site.css's own mobile padding is
+   30px 15px 77px - top and bottom don't match, leaving noticeably more
+   room under the CTA button than above the heading. Tightened to match
+   the 30px top, rather than stretching the top to meet the bottom. */
+@media (max-width: 767px) {
+  .hero__item__copy {
+    padding-bottom: 30px;
+  }
 }
 
 /* Belt-and-suspenders: guarantee exactly one icon renders regardless of
@@ -650,10 +724,21 @@ body .nl__right .gform_wrapper form .gform_body .gform_fields .gfield .ginput_co
   height: 20px;
 }
 
+/* .hero__video-toggle positions against .hero__item (its nearest
+   positioned ancestor), which - now that .hero__item's mobile height is
+   auto (see above) - grows tall enough to fit the yellow copy block
+   stacked below the video. A bottom-anchored offset would follow that
+   growth and drift down toward the copy block instead of staying on the
+   video. The video area itself is a fixed 480px (site.css, .hero__item__
+   img__wrapper) starting at .hero__item's own top edge, so anchoring from
+   the top instead (480 - 44 button - 16 gap = 420px) keeps the button in
+   exactly the same visual spot on the video regardless of how tall the
+   copy block below it is. */
 @media (max-width: 767px) {
   .hero__video-toggle {
     right: 16px;
-    bottom: 16px;
+    top: 420px;
+    bottom: auto;
     width: 44px;
     height: 44px;
   }
@@ -1202,4 +1287,26 @@ body .nl__right .gform_wrapper form .gform_body .gform_fields .gfield .ginput_co
 
 .section-quote_box + .section-video_section .video__sec {
   padding-top: 0;
+}
+
+/* ==========================================================================
+   Header logo: mobile-only 10% size reduction.
+   site.css sizes .site_logo__normal fluidly (max-width:10.74vw) on
+   desktop, then switches to two fixed mobile tiers - 160px at <=1279px,
+   120px at <=374px (very narrow phones). Both are reduced by 10% here
+   (160 * 0.9 = 144, 120 * 0.9 = 108), matching site.css's own fixed-px
+   approach at each of its existing mobile breakpoints rather than
+   introducing a new sizing scheme. Desktop's fluid 10.74vw is untouched.
+   Selector matches site.css's own 6-class-deep chain so it wins on
+   specificity, not just load order. */
+@media (max-width: 1279px) {
+  .header-footer-group .header-inner .header-titles-wrapper .header-titles .site_logo .site_logo__normal {
+    max-width: 144px;
+  }
+}
+
+@media (max-width: 374px) {
+  .header-footer-group .header-inner .header-titles-wrapper .header-titles .site_logo .site_logo__normal {
+    max-width: 108px;
+  }
 }
