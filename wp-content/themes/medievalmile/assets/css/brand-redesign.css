@@ -132,6 +132,52 @@
 }
 
 /* ==========================================================================
+   Newsletter section (.nl): one unified look across all 20 instances
+   site-wide. Was inconsistent two ways: 18 pages used the "blue" variant
+   (a light gold, #F5CB5C) and 2 pages (events-exhibitions,
+   museum-of-medieval-kilkenny) used "green" (near-black, #161412) - plus
+   museum-of-medieval-kilkenny was also missing the pt-0 pb-0 spacing
+   classes every other instance has, given a different padding rhythm.
+   The variant modifier class is dropped entirely instead of renamed to a
+   single new name, since with only one color left there's nothing left
+   for a modifier to distinguish - every instance now just uses the bare
+   .nl class, both in this CSS and in the HTML itself.
+   site.css's own .nl.blue/.green/etc background-color rules are now dead
+   code (nothing in the HTML carries those classes any more) - left alone
+   rather than edited directly, same as everywhere else in this file.
+   Recolored to the same brand gold used to unify quote_box__bg, so
+   .nl__heading/__description (both default to white, fine against the old
+   near-black but not against gold) need the same near-black contrast fix.
+   site.css qualifies both as `body .nl__heading`/`body .nl__description`
+   (a class plus the body element = higher specificity than the bare class
+   alone), so the override needs the same `body` prefix to actually win.
+   The consent checkbox label is the one other white-text element in this
+   component; its own selector chain in site.css is 8 classes deep, so
+   !important is used here rather than replicating that chain. */
+.nl {
+  background-color: #EAAC00;
+}
+
+body .nl__heading,
+body .nl__description {
+  color: #000000;
+}
+
+.nl__right .gfield_consent_label {
+  color: #000000 !important;
+}
+
+/* site.css puts a heavy drop shadow on the email input
+   (box-shadow:0 0 40px 4px rgba(0,0,0,.2)!important) - removed per request.
+   Both this and the rule being overridden use !important, so it comes down
+   to specificity, not just source order - matches site.css's exact selector
+   chain (body prefix + 6 classes deep) rather than a shorter one, since a
+   shorter chain loses on specificity even with !important on both sides. */
+body .nl__right .gform_wrapper form .gform_body .gform_fields .gfield .ginput_container input {
+  box-shadow: none !important;
+}
+
+/* ==========================================================================
    Quote box: one unified look across all 24 instances site-wide
    .quote_box__bg previously had 6 color variants (red/orange/yellow/green/
    purple/blue) applied per-page via a second class - 21 instances used the
@@ -171,11 +217,9 @@
    in site.css, all of which resolve cleanly against a 1920px design
    baseline (e.g. .quote_box__inner's 51.04167vw === 980px at 1920px - the
    same 980px used in its own sub-1280px fixed override). Pig.svg is sized
-   to 580.8x283.14 and Wolf.svg to 616x506 at that 1920px baseline (the
-   original 480x234 scaled up 10% twice for Pig.svg; Wolf.svg's original
-   560x460 scaled up 10% once):
-     580.8/1920 = 30.25vw    283.14/1920 = 14.74688vw
-     616/1920 = 32.08333vw   506/1920 = 26.35417vw
+   to 670.824x327.027 and Wolf.svg to 677.6x556.6 at that 1920px baseline:
+     670.824/1920 = 34.93875vw   327.027/1920 = 17.03264vw
+     677.6/1920 = 35.29167vw     556.6/1920 = 28.98958vw
    Using vw for both dimensions (rather than vw+vh or a fixed aspect-ratio)
    keeps each image scaling proportionally at any viewport width, matching
    how site.css itself scales things - width and height move together
@@ -196,8 +240,8 @@
   right: -1px;
   bottom: auto;
   left: auto;
-  width: 30.25vw;
-  height: 14.74688vw;
+  width: 34.93875vw;
+  height: 17.03264vw;
   object-position: right top;
 }
 
@@ -206,8 +250,8 @@
   right: auto;
   bottom: 1px;
   left: -1px;
-  width: 32.08333vw;
-  height: 26.35417vw;
+  width: 35.29167vw;
+  height: 28.98958vw;
   object-position: left bottom;
 }
 
@@ -315,12 +359,22 @@
   display: none;
 }
 
+/* max-width narrowed from site.css's 51.04167vw/980px to 920px at the
+   1920 baseline (920/1920 = 47.91667vw), fixed 920px below 1279px to
+   mirror site.css's own fluid/fixed switchover. */
 .quote_box__inner {
   height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;
   text-align: left;
+  max-width: 47.91667vw;
+}
+
+@media (max-width: 1279px) {
+  .quote_box__inner {
+    max-width: 920px;
+  }
 }
 
 .quote_box__heading {
@@ -507,4 +561,221 @@
 
 #onetrust-consent-sdk #onetrust-policy-title {
   color: #EAAC00 !important;
+}
+
+/* ==========================================================================
+   "Explore the Museum" slider cards: full hover state (image -> full brand
+   color, plus a revealed supporting-copy paragraph), not just the existing
+   CTA-color hover. Applies to every .slider__slide-link.wine/.plum/.navy/
+   .forest instance site-wide (index.html and education.html, 4 cards each).
+   Scoped to these 4 named color variants only - deliberately excludes the
+   plain `.slider__slide-link ` (no color class) blog-post cards, which are
+   a different component (.ln__item context, always-visible description,
+   date field, no copybg/card-shape) despite sharing some class names.
+
+   How the existing markup already supports most of this:
+   - .slider__slide__img (the photo wrapper) sits below .figcaption as a
+     sibling flex item, sized only by an :after pseudo-element's
+     padding-top:66.522% aspect-ratio trick - not a plain, transitionable
+     height. Neutralized here (padding-top:0) in favour of an explicit,
+     transitionable height matching that same visual size, so it can be
+     animated down to 0 on hover.
+   - figcaption is already flex:1 (grow) within the card's flex column, so
+     as .slider__slide__img's height transitions toward 0, figcaption
+     automatically (and smoothly, frame-by-frame) grows to fill the freed
+     space - no extra height animation needed on figcaption itself.
+   - figcaption already renders solid brand color behind its own content
+     (.copybg, an existing but until-now-unused-on-hover element, already
+     sits behind the heading/CTA with a matching per-variant color). Once
+     the photo fades out and its wrapper collapses to 0, that same existing
+     color reads as one continuous block for the whole card - no need to
+     duplicate or relocate .copybg.
+   - .btn-link__sec already has margin-top:auto, so it stays pinned to the
+     bottom of figcaption as figcaption grows - no reposition needed.
+   - .card-shape sizes itself to height:100% of figcaption, so it already
+     scales along with figcaption's growth automatically.
+
+   What's new: the photo fades out (opacity), its wrapper's height
+   collapses, and a .slider__slide-description paragraph (new markup,
+   hidden by default via max-height:0/opacity:0) reveals between the
+   heading and the CTA. Colors match the same wine/plum/navy/forest hex
+   values already used for .copybg's variants. */
+.slider__slide__img {
+  height: 15.59109vw;
+  overflow: hidden;
+  transition: height 0.5s ease;
+}
+
+.slider__slide__img:after {
+  padding-top: 0;
+}
+
+.slider__slide__img img {
+  transition: opacity 0.4s ease;
+}
+
+.slider__slide-link.wine .slider__slide__img {
+  background-color: #781041;
+}
+
+.slider__slide-link.plum .slider__slide__img {
+  background-color: #5A305E;
+}
+
+.slider__slide-link.navy .slider__slide__img {
+  background-color: #013A57;
+}
+
+.slider__slide-link.forest .slider__slide__img {
+  background-color: #203A1D;
+}
+
+/* margin-top:auto in the BASE state, not just on hover: auto isn't an
+   interpolable value, so switching it between states made the copy block
+   teleport on hover-exit (it snapped from bottom-anchored back to
+   under-the-title while still visible, then faded). Keeping auto constant
+   in both states means the only margin that ever changes is margin-bottom
+   (0 <-> 50px), which transitions smoothly in both directions. The CTA's
+   own site.css margin-top:auto is permanently zeroed for these cards
+   (below) so the copy's auto margin is the single bottom-anchor in both
+   states - in the default state the copy is 0-height/invisible, so the CTA
+   sits in exactly the same bottom position as it always did. */
+.slider__slide-description {
+  position: relative;
+  z-index: 2;
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  margin: auto 0 0;
+  padding: 0;
+  color: #ffffff;
+  font-size: 0.9375vw;
+  line-height: 1.6;
+  transition: max-height 0.5s ease, opacity 0.4s ease, margin 0.5s ease;
+}
+
+/* The card copy <p> takes its font-size from the site-wide base <p>
+   (20px at 1920), and line-height is pinned to 1.5 (= 30px) here to match
+   the rest of the site copy AND to keep the 4-line clamp math consistent at
+   every width (base <p>'s own line-height reverts to 1.75 below 1280px,
+   which would otherwise make 4 lines taller than the container and clip).
+   Default browser paragraph margin is zeroed (it stacked on top of the 50px
+   copy->CTA gap). Clamped to exactly 4 lines: longer copy is truncated with
+   an ellipsis, standardizing every card to the same 4-line block. */
+.slider__slide-description p {
+  margin: 0;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  overflow: hidden;
+}
+
+.slider__slide-link:hover .slider__slide__img {
+  height: 0;
+}
+
+/* The CTA's site.css margin-top:auto is zeroed permanently (not just on
+   hover) for these cards - the description right above it carries the
+   bottom-anchoring auto margin in both states instead. Toggling auto here
+   per-state was the source of the hover-exit snap (see the description
+   comment above). Scoped to the four color variants so other
+   .btn-link__sec uses around the site keep their auto margin. */
+.slider__slide-link.wine .btn-link__sec,
+.slider__slide-link.plum .btn-link__sec,
+.slider__slide-link.navy .btn-link__sec,
+.slider__slide-link.forest .btn-link__sec {
+  margin-top: 0;
+}
+
+.slider__slide-link:hover .slider__slide__img img {
+  opacity: 0;
+}
+
+/* Hover layout: the CTA locks to the bottom of the card and the copy sits
+   just above it with a fixed 50px gap, while the space between the title
+   (anchored top) and the copy is flexible/auto - achieved by giving the
+   description margin-top:auto (an auto-growing spacer that absorbs all free
+   space above it, pushing the copy+CTA block down) while the CTA's own
+   margin-top is zeroed on hover (below) so the only gap under the copy is
+   its fixed 50px margin-bottom. max-height must clear 4 lines at the copy's
+   20px/30px: 4 x 30px = 120px = 6.25vw at 1920, so 7vw is used for headroom
+   (the <p>'s own line-clamp:4 still caps it at 4 lines, so the extra ceiling
+   never reveals a 5th line - it just prevents the previous bottom clipping). */
+.slider__slide-link:hover .slider__slide-description {
+  max-height: 7vw;
+  opacity: 1;
+  margin-bottom: 2.60417vw;
+}
+
+/* Decorative background shape: FIXED height at all times, in both states.
+   site.css sized it height:100% of figcaption, which made it stretch/flash
+   whenever figcaption changed size during the hover transitions. Decoupled
+   entirely instead: the shape gets one constant height (its default visual
+   size) and never moves - the whole hover layout is driven purely by the
+   image height animating full <-> 0. Same selector site.css uses, so this
+   wins on load order.
+   Desktop: 18.1974vw = default figcaption height (card 33.7882vw - image
+   15.59109vw), all vw so it holds across the desktop range.
+   Mobile: figcaption is a fixed 250px, image fixed-px - so fixed 180px for
+   card-shape-right (72% of 250) and 250px for card-shape-bottom. */
+.slider__slide-image figcaption .card-shape-right,
+.slider__slide-image figcaption .card-shape-bottom {
+  height: 18.1974vw;
+}
+
+@media (max-width: 1279px) {
+  .slider__slide__img {
+    height: 188.25726px;
+  }
+
+  .slider__slide-description {
+    font-size: 18px;
+  }
+
+  .slider__slide-link:hover .slider__slide-description {
+    max-height: 120px;
+    margin-bottom: 50px;
+  }
+
+  .slider__slide-image figcaption .card-shape-right {
+    height: 180px;
+  }
+
+  .slider__slide-image figcaption .card-shape-bottom {
+    height: 250px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slider__slide__img,
+  .slider__slide__img img,
+  .slider__slide-description {
+    transition: none !important;
+  }
+}
+
+/* ==========================================================================
+   Body-copy paragraph size correction (general, not hover-specific).
+   site.css sizes copy paragraphs to a fluid 1.14583vw (~22px at 1920) with
+   inconsistent line-heights (1.75 on base <p> / .ic__description, 1.77 on
+   .nl__description, 1.5 on .slider__copy__description, etc). Unified here to
+   1.04167vw font-size (= 20px at 1920) AND line-height 1.5 (= exactly 30px
+   at that 20px), so every copy paragraph reads at the same 20px/30px across
+   the whole site. Scoped to >=1280px only, so site.css's own <=1279px fixed
+   fallbacks are left untouched (an unscoped override would wrongly shrink
+   those mobile sizes too). Applied to the copy-paragraph selectors that
+   carry the fluid value - base <p> plus the .ic__description /
+   .quote_box__description / .slider__copy__description / .nl__description
+   variants that re-declare it - NOT to the buttons, sub-headings, nav items
+   or form inputs that also happen to use 1.14583vw (those aren't body copy). */
+@media (min-width: 1280px) {
+  p,
+  .ic__description p,
+  .quote_box__description p,
+  .slider__copy__description p,
+  body .nl__description {
+    font-size: 1.04167vw;
+    line-height: 1.5;
+  }
 }
