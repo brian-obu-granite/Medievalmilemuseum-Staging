@@ -830,17 +830,37 @@ body .nl__right .gform_wrapper form .gform_footer input:hover {
    hidden by default via max-height:0/opacity:0) reveals between the
    heading and the CTA. Colors match the same wine/plum/navy/forest hex
    values already used for .copybg's variants. */
-.slider__slide__img {
+/* Scoped to the 4 color variants, same as everything else in this section -
+   these three were the actual bug: written as bare .slider__slide__img
+   selectors despite the comment above declaring the whole effect scoped to
+   color variants, so they leaked onto blog cards (.ln__item), which share
+   this exact markup/classes with no color modifier. Blog cards got the
+   same fixed-height/transition/opacity setup and, further down, the same
+   :hover collapse-and-fade - a heavy animation with nothing to reveal,
+   since blog cards' description is always visible already (unlike these
+   cards, where it's hidden until hover). Scoping these three removes it
+   from blog cards entirely, which fall back to site.css's own static
+   aspect-ratio box (:after{padding-top:66.522%}) with no hover behavior. */
+.slider__slide-link.wine .slider__slide__img,
+.slider__slide-link.plum .slider__slide__img,
+.slider__slide-link.navy .slider__slide__img,
+.slider__slide-link.forest .slider__slide__img {
   height: 15.59109vw;
   overflow: hidden;
   transition: height 0.5s ease;
 }
 
-.slider__slide__img:after {
+.slider__slide-link.wine .slider__slide__img:after,
+.slider__slide-link.plum .slider__slide__img:after,
+.slider__slide-link.navy .slider__slide__img:after,
+.slider__slide-link.forest .slider__slide__img:after {
   padding-top: 0;
 }
 
-.slider__slide__img img {
+.slider__slide-link.wine .slider__slide__img img,
+.slider__slide-link.plum .slider__slide__img img,
+.slider__slide-link.navy .slider__slide__img img,
+.slider__slide-link.forest .slider__slide__img img {
   transition: opacity 0.4s ease;
 }
 
@@ -901,7 +921,10 @@ body .nl__right .gform_wrapper form .gform_footer input:hover {
   overflow: hidden;
 }
 
-.slider__slide-link:hover .slider__slide__img {
+.slider__slide-link.wine:hover .slider__slide__img,
+.slider__slide-link.plum:hover .slider__slide__img,
+.slider__slide-link.navy:hover .slider__slide__img,
+.slider__slide-link.forest:hover .slider__slide__img {
   height: 0;
 }
 
@@ -918,7 +941,10 @@ body .nl__right .gform_wrapper form .gform_footer input:hover {
   margin-top: 0;
 }
 
-.slider__slide-link:hover .slider__slide__img img {
+.slider__slide-link.wine:hover .slider__slide__img img,
+.slider__slide-link.plum:hover .slider__slide__img img,
+.slider__slide-link.navy:hover .slider__slide__img img,
+.slider__slide-link.forest:hover .slider__slide__img img {
   opacity: 0;
 }
 
@@ -959,7 +985,13 @@ body .nl__right .gform_wrapper form .gform_footer input:hover {
 }
 
 @media (max-width: 1279px) {
-  .slider__slide__img {
+  /* Scoped to the 4 color variants for the same reason as the desktop
+     rules above - this bare selector was leaking the fixed mobile image
+     height onto blog cards too. */
+  .slider__slide-link.wine .slider__slide__img,
+  .slider__slide-link.plum .slider__slide__img,
+  .slider__slide-link.navy .slider__slide__img,
+  .slider__slide-link.forest .slider__slide__img {
     height: 188.25726px;
   }
 
@@ -974,12 +1006,22 @@ body .nl__right .gform_wrapper form .gform_footer input:hover {
      back to their own default (non-hover) values - same bucket as every
      other mobile-only override in this file - neutralizes the animation
      entirely on mobile while leaving the unscoped desktop :hover rules
-     above untouched. */
-  .slider__slide-link:hover .slider__slide__img {
+     above untouched. Scoped to the 4 color variants, matching the base
+     rule above - left unscoped, this would still have forced blog cards'
+     image back to this fixed height on tap, even after scoping the base
+     rule removed it from their default state, producing a brief flash to
+     the wrong height instead of no effect at all. */
+  .slider__slide-link.wine:hover .slider__slide__img,
+  .slider__slide-link.plum:hover .slider__slide__img,
+  .slider__slide-link.navy:hover .slider__slide__img,
+  .slider__slide-link.forest:hover .slider__slide__img {
     height: 188.25726px;
   }
 
-  .slider__slide-link:hover .slider__slide__img img {
+  .slider__slide-link.wine:hover .slider__slide__img img,
+  .slider__slide-link.plum:hover .slider__slide__img img,
+  .slider__slide-link.navy:hover .slider__slide__img img,
+  .slider__slide-link.forest:hover .slider__slide__img img {
     opacity: 1;
   }
 
@@ -1307,6 +1349,28 @@ body .nl__right .gform_wrapper form .gform_footer input:hover {
 
 @media (max-width: 374px) {
   .header-footer-group .header-inner .header-titles-wrapper .header-titles .site_logo .site_logo__normal {
+    max-width: 108px;
+  }
+}
+
+/* Footer logo: match the nav logo's mobile size exactly.
+   Both <img> tags already point at the same file
+   (momk-logo-white-amber.png) but are two separate placements (header vs
+   footer), each with their own site.css sizing rule, so there's no single
+   shared selector to change once for both - site.css sizes the footer
+   logo fluidly at 10.41667vw on desktop (untouched here) and a fixed
+   200px at <=1279px, with no separate narrow-phone tier of its own.
+   Overridden to the exact same two values as the nav logo above (144px /
+   108px) so both render identically at every mobile width instead of
+   just approximately matching. */
+@media (max-width: 1279px) {
+  .site-footer__logo a img {
+    max-width: 144px;
+  }
+}
+
+@media (max-width: 374px) {
+  .site-footer__logo a img {
     max-width: 108px;
   }
 }
