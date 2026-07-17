@@ -1374,3 +1374,10 @@ body .nl__right .gform_wrapper form .gform_footer input:hover {
     max-width: 108px;
   }
 }
+
+/* Top notification strip: site.css's default is near-black (#161412),
+   same as the main header - lightened to a neutral dark gray so the
+   strip reads as visually distinct from the header below it. */
+.top-bar {
+  background: #3C3C3C;
+}
