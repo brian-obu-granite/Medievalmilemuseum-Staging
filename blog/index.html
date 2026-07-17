@@ -475,6 +475,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 </div>                                            </div>
         </div>
 
+                    <div class="load_more_div">
+                <a href="javascript:void(0)" class="load_more_btn btn">Load more
+                    <input type="hidden" value="" class="exclude_post_id" />
+                </a>
+            </div>
 
     </div>
 </div>
@@ -602,6 +607,26 @@ R95K276</p>
 	</div>
 </footer><!-- #site-footer -->
 <script>window.addEventListener('DOMContentLoaded', function() {
+	var ajax_call_url;
+	var perpage = '6';
+	var paged = 1;
+	ajax_call_url = "../wp-admin/admin-ajax.php";
+	var news_search_cat = "";
+
+	jQuery(document).ready(function() {
+		if (jQuery(".news_insights_section").length > 0) {
+			jQuery(".news_search_category").on("change", function() {
+				paged = 1;
+				news_search_cat = jQuery(this).val();
+				filter_result('filter');
+			})
+
+			jQuery(".load_more_btn").on("click", function() {
+				filter_result('loadmore');
+			})
+		}
+	})
+
 	jQuery(window).on("scroll", function() {
 		if(jQuery(window).scrollTop() > 50) {
 			jQuery("body").addClass("stickyHeader");
@@ -609,6 +634,78 @@ R95K276</p>
 			jQuery("body").removeClass("stickyHeader");
 		}
 	})
+
+	function filter_result(type) {
+		var currentPostCount = jQuery(".news_insights_section > .news_posts_list > *").length;;
+
+		jsonObj = {
+			"action": "filter_news",
+			"category": news_search_cat,
+			"postperpage": parseInt(perpage),
+			"currentPostCount": currentPostCount,
+			"type": type
+		};
+
+		if (type == "loadmore") {
+			paged = paged + 1;
+			jsonObj['paged'] = paged;
+		} else {
+			jsonObj['paged'] = 1;
+		}
+
+		jQuery.ajax({
+			url: ajax_call_url,
+			data: jsonObj, // form data
+			type: "POST", // POST
+			async: false,
+			beforeSend: function(xhr) {
+				console.log("ajax start"); // changing the button label
+			},
+			success: function(data) {
+				// console.log(data.data);
+
+				if (data.data.replace(/(\r\n\t|\n|\r\t)/gm, "").replace(" ", "") == "false" && type != 'loadmore') {
+					jQuery('.load_more_img').hide();
+					jQuery(".news_insights_section > .news_posts_list").html("<div class='no_found'><h3>Result not found!!</h3></div>");
+					jQuery(".news_insights_section > .news_posts_list").show();
+					jQuery(".load_more_btn").hide();
+					return false;
+				} else if (type == 'loadmore') {
+					jQuery('.load_more_img').hide();
+					jQuery(".news_insights_section > .news_posts_list").show();
+					jQuery(".news_insights_section > .news_posts_list").append(data.data);
+				} else {
+					jQuery(".news_insights_section > .news_posts_list").html("");
+					jQuery(".news_insights_section > .news_posts_list").html(data.data);
+					jQuery('.load_more_img').hide();
+					jQuery(".news_insights_section > .news_posts_list").show();
+				}
+
+				setTimeout(function() {
+					var total = jQuery("#total_post_count").val();
+					var current = jQuery("#current_post_count").val();
+					total = parseInt(total);
+
+					var c_total = jQuery(".news_insights_section > .news_posts_list > div").length;
+					if (total != '' && current != '') {
+						if (parseInt(total) == c_total) {
+							jQuery(".load_more_btn").hide();
+						} else {
+							jQuery(".load_more_btn").show();
+						}
+					}
+					jQuery("#total_post_count").remove();
+					jQuery("#current_post_count").remove();
+				}, 1000);
+
+			},
+			error: function(xhr) {
+				jQuery('.load_more_img').hide();
+				jQuery(".news_insights_section > .news_posts_list").show();
+				console.log(xhr);
+			}
+		});
+	}
 });</script>
 
 
