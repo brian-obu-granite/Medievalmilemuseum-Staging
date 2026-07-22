@@ -5,21 +5,21 @@
 
    TYPEFACE NOTE:
    The brand guide specifies Bartender (headlines), Macho (sub-heads/quotes)
-   and Tenon (body copy). These are commercial fonts and no licensed webfont
-   files were available in the project folder, so this override swaps in the
-   closest free Google Fonts as a placeholder — reusing the SAME @font-face
-   family names the theme already references everywhere (Montserrat-*,
-   SourceSerifPro-*), so no other stylesheet needs to change:
-     - Montserrat-ExtraBold / Montserrat-Bold  -> Anton      (headline caps)
-     - Montserrat-SemiBold / Montserrat-Medium -> Baloo 2     (sub-heads/nav/buttons)
-     - SourceSerifPro-Regular / -Semibold      -> Nunito Sans (body copy)
-   Swap these @font-face src URLs for the real Bartender/Macho/Tenon webfont
-   files once licensed, and this file can stay otherwise untouched.
-   ========================================================================== */
+   and Tenon (body copy) - reusing the SAME @font-face family names the
+   theme already references everywhere (Montserrat-*, SourceSerifPro-*), so
+   no other stylesheet needs to change:
+     - Montserrat-ExtraBold / Montserrat-Bold  -> Bartender SemiCondensed Sans
+       (the real, licensed headline font - dist/fonts/Bartender-
+       SemiCondensedSans.ttf, confirmed against the brand guide)
+     - Montserrat-SemiBold / Montserrat-Medium -> Baloo 2     (sub-heads/nav/buttons - placeholder, real Macho not yet licensed)
+     - SourceSerifPro-Regular / -Semibold      -> Nunito Sans (body copy - placeholder, real Tenon not yet licensed)
+   Swap the remaining two @font-face src URLs for the real Macho/Tenon
+   webfont files once licensed, following the same pattern as Bartender
+   below. */
 
 @font-face {
   font-family: Montserrat-ExtraBold;
-  src: url(https://fonts.gstatic.com/s/anton/v27/1Ptgg87LROyAm0K0.ttf) format("truetype");
+  src: url(../../dist/fonts/Bartender-SemiCondensedSans.ttf) format("truetype");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -27,7 +27,7 @@
 
 @font-face {
   font-family: Montserrat-Bold;
-  src: url(https://fonts.gstatic.com/s/anton/v27/1Ptgg87LROyAm0K0.ttf) format("truetype");
+  src: url(../../dist/fonts/Bartender-SemiCondensedSans.ttf) format("truetype");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -63,6 +63,115 @@
   font-weight: 400;
   font-style: normal;
   font-display: swap;
+}
+
+/* Real Macho Semibold (dist/fonts/Macho-Semibold.otf) - licensed via Adobe
+   Fonts desktop activation, not the shared Montserrat-SemiBold/-Medium
+   family used for nav/buttons elsewhere (that's still on the Baloo 2
+   placeholder). Scoped to its own family name and applied only to h3/h4
+   below, per request - deliberately not touched anywhere else until a
+   redistributable license (or a free alternative) is sourced for the
+   client's own site once live, since an Adobe Fonts desktop activation
+   isn't licensed for shipping the file on a public server long-term. */
+@font-face {
+  font-family: Macho-Semibold;
+  src: url(../../dist/fonts/Macho-Semibold.otf) format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Bartender headline tracking: brand guide calls for -2% letter-spacing on
+   titles. Percentage tracking from design tools maps directly to em (-2%
+   of the element's own font-size = -0.02em), which is also why em is used
+   here rather than a fixed px/vw value - it scales automatically with
+   each heading's own fluid font-size, no separate breakpoint math needed.
+   Targets every h1-h6 (plus the .h1-.h6 utility class variants site.css
+   also uses on non-heading tags) since that covers all Montserrat-
+   ExtraBold/-Bold titles site-wide. .page-banner__copy h1 needs its own
+   explicit override - site.css redundantly re-declares
+   letter-spacing:normal there at higher specificity than the bare h1
+   rule, so it would otherwise win and silently ignore the h1 override. */
+.h1, h1,
+.h2, h2,
+.h3, h3,
+.h4, h4,
+.h5, h5,
+.h6, h6 {
+  letter-spacing: -0.02em;
+}
+
+.page-banner__copy h1 {
+  letter-spacing: -0.02em;
+}
+
+/* h3/h4 switch from Bartender (inherited from the generic .h1-.h6 rule
+   above, same as every other heading level) to the real Macho Semibold. */
+.h3, h3,
+.h4, h4 {
+  font-family: Macho-Semibold;
+}
+
+/* .quote_box__sub-heading (the testimonial attribution, e.g. "Jaime,
+   Washington") is an h4 but - like .page-banner__copy h1 for
+   letter-spacing above - site.css redundantly re-declares its own
+   font-family:Montserrat-ExtraBold at higher specificity than the bare h4
+   rule, so it would otherwise keep rendering in Bartender instead of
+   picking up Macho Semibold like every other h4. */
+.quote_box__sub-heading {
+  font-family: Macho-Semibold;
+}
+
+/* Same story for two more real h3/h4 tags that redundantly redeclare
+   font-family at higher specificity than the bare tag rule:
+   .ic__sub-heading (h4, e.g. "Events & Exhibitions" card labels) was on
+   Montserrat-SemiBold (Baloo 2 placeholder); .ic__heading__pink (h3, e.g.
+   "Visit the Kilkenny Room...") was on SourceSerifPro-SemiBold (Nunito
+   Sans placeholder) - neither is the Bartender/Montserrat-ExtraBold this
+   session already swapped, but both are still genuine h3/h4 tags, so they
+   follow the same "all h3/h4 use Macho Semibold" instruction.
+   Deliberately NOT touching the OneTrust cookie-consent banner's own h3/h4
+   elements ("Your Privacy", "Strictly Necessary Cookies", etc.) - that's
+   third-party widget markup injected at runtime, not part of the site's
+   own heading system. */
+.ic__sub-heading,
+.ic__heading__pink {
+  font-family: Macho-Semibold;
+}
+
+/* .ic__heading__pink (e.g. "Visit the Kilkenny Room...") reads noticeably
+   larger in Macho Semibold than it did in the old placeholder font at the
+   exact same font-size - a difference in the two typefaces' own optical
+   proportions, not a change in the size value itself (site.css's
+   font-size here is untouched by the font-family swap above). Sized down
+   ~15% at each of site.css's existing breakpoints to compensate. Adjust
+   further if this guess over/undershoots. */
+.ic__heading__pink {
+  font-size: 1.41667vw;
+}
+
+@media (max-width: 1279px) {
+  .ic__heading__pink {
+    font-size: 26px;
+  }
+}
+
+@media (max-width: 1199px) {
+  .ic__heading__pink {
+    font-size: 24px;
+  }
+}
+
+@media (max-width: 991px) {
+  .ic__heading__pink {
+    font-size: 22px;
+  }
+}
+
+@media (max-width: 767px) {
+  .ic__heading__pink {
+    font-size: 20px;
+  }
 }
 
 /* ==========================================================================
@@ -678,6 +787,54 @@ body .nl__right .gform_wrapper form .gform_footer input:hover {
 @media (max-width: 767px) {
   .hero__item__copy {
     padding-bottom: 30px;
+  }
+}
+
+/* Hero description ("Make the Medieval Mile Museum...") switched from a
+   <p> to an <h5> in the markup (h4 was tried first but read too large
+   next to the heading above it - h5 is the better fit). h5 isn't part of
+   the shared h3/h4 -> Macho Semibold rule above, so font-family is set
+   explicitly here instead of broadening that rule to every h5 site-wide.
+   letter-spacing still comes for free from the shared h1-h6 rule further
+   up, which already covers h5.
+   Font-size intentionally matches the real h5-equivalent target
+   (site.css's own .h5,h5: 1.66667vw desktop = 32px at 1920, then 30px/
+   26px/24px at its <=1279px/991px/767px breakpoints) rather than the old
+   p tag's larger size - the whole point of the h4->h5 change was to drop
+   to that smaller, correctly-proportioned scale, not just relabel the tag
+   while keeping the old size. White colour + shadow (for legibility over
+   the video) and the mobile-only near-black override (once the section
+   switches to a solid background) still need to be replicated here since
+   site.css's original rules were written for a <p>, which no longer
+   matches now that the tag changed. */
+.hero__item__copy__description h5 {
+  margin: 0;
+  padding: 0;
+  font-size: 1.66667vw;
+  color: #fff;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  font-family: Macho-Semibold;
+  font-weight: 400;
+  line-height: 1.25;
+}
+
+@media (max-width: 1279px) {
+  .hero__item__copy__description h5 {
+    font-size: 30px;
+  }
+}
+
+@media (max-width: 991px) {
+  .hero__item__copy__description h5 {
+    font-size: 26px;
+  }
+}
+
+@media (max-width: 767px) {
+  .hero__item__copy__description h5 {
+    font-size: 24px;
+    color: #161412 !important;
+    text-shadow: none !important;
   }
 }
 
@@ -1380,4 +1537,27 @@ body .nl__right .gform_wrapper form .gform_footer input:hover {
    strip reads as visually distinct from the header below it. */
 .top-bar {
   background: #3C3C3C;
+}
+
+/* Contact page: give the contact form column its own white card against
+   the page's cream body background, rather than sitting flush/flat like
+   the plain-text "GET IN TOUCH" column beside it. .page-content__col is
+   shared by both columns with no modifier class to distinguish them, so
+   :has() targets specifically the one containing the Gravity Forms
+   contact form. */
+.page-content__col:has(.gform_wrapper) {
+  background-color: #ffffff;
+  padding: 50px 25px;
+}
+
+/* Contact page map: site.css sizes .map__wrapper iframe with a fixed
+   600px (desktop) / 450px (<=1279px) height, unlike the rest of the site's
+   fluid-above-1280px convention - both declared with !important, so the
+   override needs !important too or it silently loses regardless of
+   source order. Overridden to 570px at the 1920px design baseline
+   (570/1920 = 29.6875vw) so it scales fluidly like everything else - the
+   existing 450px mobile/tablet value is left as-is (site.css, unchanged)
+   since no mobile size was specified. */
+.map__wrapper iframe {
+  height: 29.6875vw !important;
 }
