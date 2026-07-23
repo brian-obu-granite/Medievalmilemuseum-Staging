@@ -932,25 +932,6 @@ body .nl__right .gform_wrapper form .gform_footer input:hover {
   }
 }
 
-/* Second homepage video section: site.css sizes .embed-responsive purely
-   via an aspect-ratio padding-top trick (42.3% of width, no explicit
-   height), which this overrides with a fixed 900px at the 1920px baseline
-   (900/1920 = 46.875vw) - fluid like every other dimension above, and with
-   no 1279px breakpoint fallback since (unlike .quote_box) a video has no
-   text content that risks overflowing/clipping at a fixed height.
-   Overriding the height independently of width means the container's own
-   aspect ratio no longer matches the video's native aspect ratio at most
-   viewport widths, so object-fit:cover is added (the same technique
-   site.css already uses on the hero's own video) to crop rather than
-   stretch/distort it. */
-.embed-responsive {
-  height: 46.875vw;
-}
-
-.embed-responsive video {
-  object-fit: cover;
-}
-
 /* ==========================================================================
    OneTrust cookie consent banner
    OneTrust injects its own <style> block at runtime (a remote theme config
@@ -1491,33 +1472,6 @@ body .nl__right .gform_wrapper form .gform_footer input:hover {
 .menu-modal .menu-modal-inner .menu-wrapper .menu-top .mobile-menu .modal-menu .menu-item.current-menu-item.current_page_item .ancestor-wrapper a,
 .menu-modal .menu-modal-inner .menu-wrapper .menu-top .mobile-menu .modal-menu .menu-item .ancestor-wrapper a:hover {
   color: #EAAC00;
-}
-
-/* ==========================================================================
-   Testimonial -> Video adjacency: collapse the gap when these two blocks
-   sit directly back-to-back (currently the quote_box -> video_section pair
-   on the homepage), leaving normal spacing intact whenever anything else
-   sits between them.
-
-   .quote_box__sec and .video__sec are both generic ".module" blocks, and
-   site.css's .module gives every section the same padding top AND bottom
-   (7.8125vw desktop, fixed 50px/60px at the two mobile breakpoints) - that
-   shared padding is what creates the visible gap. Each page builder section
-   is wrapped in its own ".section-<type>" div, and it's those wrapper divs
-   that are the true DOM siblings (the .module elements are one level
-   nested inside each), so the adjacency check targets the wrappers and
-   reaches into the nested .module to zero only the touching edge -
-   testimonial's bottom, video's top - on both sides of the seam. Scoped to
-   the reusable .section-quote_box/.section-video_section component
-   classes (not the homepage's quote_box_4/video_section_5 instance ids),
-   so it applies automatically wherever this pair occurs, current or
-   future, on any page. */
-.section-quote_box:has(+ .section-video_section) .quote_box__sec {
-  padding-bottom: 0;
-}
-
-.section-quote_box + .section-video_section .video__sec {
-  padding-top: 0;
 }
 
 /* ==========================================================================
