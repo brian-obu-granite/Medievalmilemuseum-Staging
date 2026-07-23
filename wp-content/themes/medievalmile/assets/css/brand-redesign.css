@@ -966,11 +966,12 @@ body .nl__right .gform_wrapper form .gform_footer input:hover {
    spare down the right edge, so the dots drop into normal flow instead:
    a plain centered row under the arrows. */
 .quote_box__controls-dots {
-  position: absolute;
+  position: fixed;
   top: 50%;
   right: 2.34375vw;
   transform: translateY(-50%);
   padding: 0;
+  z-index: 11;
 }
 
 .quote_box__controls-dots .slick-dots {
