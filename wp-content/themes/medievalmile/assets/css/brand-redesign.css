@@ -186,12 +186,12 @@
   .page-banner__copy h1 { font-size: 4.94792vw; }  /* 95px @1920 */
 }
 
-/* h3/h4/h6 switch from Bartender (inherited from the generic .h1-.h6 rule
+/* h3/h4/h5/h6 switch from Bartender (inherited from the generic .h1-.h6 rule
    above, same as every other heading level) to the real Macho Semibold.
-   h6 also gets normalized line-height (1.25) for consistent spacing,
-   since it's used for longer text like testimonial copy. */
+   h5/h6 also get normalized line-height (1.25) for consistent spacing. */
 .h3, h3,
 .h4, h4,
+.h5, h5,
 .h6, h6 {
   font-family: Macho-Semibold;
 }
@@ -201,13 +201,8 @@ h6, .h6 {
   line-height: 1.25;
 }
 
-/* Card headings ("Opening Hours & Prices" etc., now h5): the one h5-rung
-   member still on SourceSerifPro-SemiBold (the Nunito Sans placeholder -
-   not a brand font), swapped to the same real Macho used by the other
-   sub-head styles. Size already matches the 32px rung. */
-.cg__card__heading {
-  font-family: Macho-Semibold;
-}
+/* Card headings ("Opening Hours & Prices" etc., now h5) use Macho-Semibold
+   via the h5 rule above. Size already matches the 32px rung. */
 
 /* .quote_box__sub-heading (the testimonial attribution, e.g. "Jaime,
    Washington") is an h4 but - like .page-banner__copy h1 for
