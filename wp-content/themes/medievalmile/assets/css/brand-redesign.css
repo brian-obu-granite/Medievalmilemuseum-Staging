@@ -633,13 +633,13 @@ body .nl__right .gform_wrapper form .gform_footer input:hover {
 }
 
 /* Homepage testimonial only: copy retagged from <p> to a heading (see the
-   slider rebuild further down) - now an h4 under the consolidated heading
-   scale (44px rung, same visual size it had as an h3 under the old
-   scale). Same black-text fix as the <p> rule above, needed again since
-   it's a different element now. Margin zeroed to match how the <p> sat
-   flush against the heading above it (the generic heading rules give it
-   its own vertical margin otherwise). */
-.quote_box__description h4 {
+   slider rebuild further down) - now an h6 under the consolidated heading
+   scale (27px rung, smaller than the h4 it was). Same black-text fix as
+   the <p> rule above, needed again since it's a different element now.
+   Margin zeroed to match how the <p> sat flush against the heading above
+   it (the generic heading rules give it its own vertical margin
+   otherwise). */
+.quote_box__description h6 {
   color: #000000;
   margin: 0;
 }
