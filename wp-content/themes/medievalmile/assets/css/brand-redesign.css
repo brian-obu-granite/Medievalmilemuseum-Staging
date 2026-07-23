@@ -173,10 +173,11 @@
   .page-banner__copy h1 { font-size: 4.94792vw; }  /* 95px @1920 */
 }
 
-/* h3/h4 switch from Bartender (inherited from the generic .h1-.h6 rule
+/* h3/h4/h6 switch from Bartender (inherited from the generic .h1-.h6 rule
    above, same as every other heading level) to the real Macho Semibold. */
 .h3, h3,
-.h4, h4 {
+.h4, h4,
+.h6, h6 {
   font-family: Macho-Semibold;
 }
 
@@ -198,20 +199,15 @@
   font-family: Macho-Semibold;
 }
 
-/* Same story for two more real h3/h4 tags that redundantly redeclare
-   font-family at higher specificity than the bare tag rule:
-   .ic__sub-heading (h4, e.g. "Events & Exhibitions" card labels) was on
-   Montserrat-SemiBold (Baloo 2 placeholder); .ic__heading__pink (h3, e.g.
-   "Visit the Kilkenny Room...") was on SourceSerifPro-SemiBold (Nunito
-   Sans placeholder) - neither is the Bartender/Montserrat-ExtraBold this
-   session already swapped, but both are still genuine h3/h4 tags, so they
-   follow the same "all h3/h4 use Macho Semibold" instruction.
+/* .ic__sub-heading (h4, e.g. "Events & Exhibitions" card labels) was on
+   Montserrat-SemiBold (Baloo 2 placeholder) - still applies Macho Semibold
+   via the h4 rule above. .ic__heading__pink (h6 elements like "Visit the
+   Kilkenny Room...") now covered by the h6 rule above, no redundant rule needed.
    Deliberately NOT touching the OneTrust cookie-consent banner's own h3/h4
    elements ("Your Privacy", "Strictly Necessary Cookies", etc.) - that's
    third-party widget markup injected at runtime, not part of the site's
    own heading system. */
-.ic__sub-heading,
-.ic__heading__pink {
+.ic__sub-heading {
   font-family: Macho-Semibold;
 }
 
