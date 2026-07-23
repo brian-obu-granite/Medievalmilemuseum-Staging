@@ -201,6 +201,11 @@ h6, .h6 {
   line-height: 1.25;
 }
 
+/* Increase gap between testimonial copy and attribution to 60px */
+h5 {
+  margin-bottom: 60px !important;
+}
+
 /* Card headings ("Opening Hours & Prices" etc., now h5) use Macho-Semibold
    via the h5 rule above. Size already matches the 32px rung. */
 
@@ -212,6 +217,10 @@ h6, .h6 {
    picking up Macho Semibold like every other h4. */
 .quote_box__sub-heading {
   font-family: Macho-Semibold;
+  line-height: 1.25; /* site.css's own h4 line-height:1 is tight enough to
+                         crop descenders (the comma, the "g" in
+                         "Washington") - matches the 1.25 already used for
+                         the h5/h6 rungs above */
 }
 
 /* .ic__sub-heading (h4, e.g. "Events & Exhibitions" card labels) was on
@@ -660,12 +669,24 @@ body .nl__right .gform_wrapper form .gform_footer input:hover {
    technique for recoloring an arrow icon to black (see .btn-link--pink:after
    in site.css, which loads a colour SVG then flattens it with the same
    filter) instead of introducing a new one-off approach. */
+.quote_box__btn {
+  padding-top: 5px !important;
+}
+
 .quote_box__btn .btn-link--white {
   color: #000000;
 }
 
 .quote_box__btn .btn-link--white:after {
   filter: brightness(0);
+}
+
+/* .btn-link:before (site.css) is the hover underline, brand yellow
+   (#F3B100) by default - invisible against this section's own yellow
+   background, so it needs to switch to black like the rest of the
+   white-on-dark assumption this CTA already overrides above. */
+.quote_box__btn .btn-link--white:before {
+  background-color: #000000;
 }
 
 /* Quote box height: site.css leaves .quote_box's height entirely up to its
@@ -912,13 +933,16 @@ body .nl__right .gform_wrapper form .gform_footer input:hover {
    that same fixed height every time, instead of drifting with content
    length. */
 .quote_box__slider {
-  flex: 1 1 auto;
-  min-height: 0;
+  height: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .quote_box__slider .slick-list,
 .quote_box__slider .slick-track {
   height: 100%;
+  width: 100%;
 }
 
 .quote_box__slide {
@@ -928,31 +952,119 @@ body .nl__right .gform_wrapper form .gform_footer input:hover {
   justify-content: center;
 }
 
-/* Homepage testimonial only, desktop only: the decorative quote-mark
-   glyph (.quote_box__heading:before, set up above) sits above and to the
-   left of the heading's own box (top:-5vw;left:-10vw) - against this
-   instance's fixed-height, slider-driven .quote_box it pokes out above
-   the box's own overflow:hidden top edge, leaving only a clipped sliver
-   of the icon visible. Hidden here only; the other 23 quote_box instances
-   (shorter, single-testimonial, content-driven height) keep the icon, and
-   so does this same instance at <=1279px, where .quote_box reverts to
-   auto height and the icon's own mobile position rule (further up) is
-   already sized to fit without clipping. */
+/* Homepage testimonial (#quote_box_4) only: the shared .quote_box__heading:before
+   icon (used by the other 23 quote_box instances) is positioned relative to
+   the heading's OWN box (top:-5vw;left:-10vw) - fine for those single-
+   testimonial instances, whose heading sits at a fixed spot since the box's
+   height is content-driven. This slider instance is different: .quote_box
+   has a fixed height and .quote_box__inner centers a variable-height stack
+   inside it (4 testimonials, very different copy lengths), so the heading's
+   own vertical position shifts slide to slide - anchoring the icon to it
+   meant it could ride up near/past .quote_box's own overflow:hidden top
+   edge for the longer testimonials, clipping it.
+
+   Fix: hide the shared heading-relative icon here and use a standalone
+   .quote_box__quote-icon element instead (HTML), a sibling of
+   .quote_box__slider inside .quote_box__slider-wrap - not a child of
+   .quote_box__slider itself, since slick.js treats every direct child of
+   the slider element as a slide and would break the carousel.
+   .quote_box__slider-wrap is the positioning context (position:relative,
+   no size/margin of its own), so the icon's top:0 lines up with
+   .quote_box__slider's own top edge exactly, whatever that ends up being -
+   both move together as .quote_box__inner's centering shifts the whole
+   wrap per slide, instead of the icon drifting independently against a
+   fixed guess. It can never clip past .quote_box's own top edge either,
+   since it can't render any higher than the slider it's pinned to. */
 @media (min-width: 1280px) {
   #quote_box_4 .quote_box__heading:before {
     display: none;
   }
 }
 
+.quote_box__slider-wrap {
+  position: relative;
+}
+
+.quote_box__quote-icon {
+  display: none;
+}
+
+@media (min-width: 1280px) {
+  .quote_box__quote-icon {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: -230px; /* 200px icon width + 30px gap, so it sits fully to the
+                      left of .quote_box__inner's edge with clean spacing
+                      instead of overlapping it */
+    width: 200px;
+    height: 163px; /* matches the icon-quote.svg's native 107:87 aspect ratio */
+    background-image: url(../../dist/images/icon-quote.svg);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    z-index: 2; /* above .quote_box__shape's z-index:1 (site.css), below
+                    .quote_box__inner's own z-index:3 (site.css) so the
+                    heading text still reads in front where they overlap */
+  }
+}
+
+/* Rotated 90deg clockwise so the shared left/right arrow SVGs (borrowed
+   from the horizontal card slider) point up/down instead - prev (left)
+   becomes up, next (right) becomes down - matching the vertical stack
+   look (arrow / dots / arrow) requested for this slider only. */
 .quote_box__controls-arrow {
+  position: absolute;
+  right: 2.34375vw;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 2.65625vw; /* matches the arrow button's own width so this box's
+                        center lines up with .quote_box__controls-dots'
+                        identical width/right below, regardless of the
+                        dots' own narrower content */
   display: flex;
-  margin-top: 1.5625vw;
+  flex-direction: column;
+  align-items: center;
+  gap: 7.29167vw; /* leaves room for the 4-dot stack centered in the middle */
+  z-index: 10;
+}
+
+.quote_box__controls-arrow .slider__controls-arrow-button {
+  margin: 0;
+  background-color: transparent;
+  border: 0;
+}
+
+.quote_box__controls-arrow svg {
+  transform: rotate(90deg);
+}
+
+/* Keep the arrow icon black at all times - site.css's own hover state
+   (.slider__controls-arrow-button:hover svg path/circle) turns it solid
+   brand yellow, which at this icon's size/rotation reads as a yellow
+   block rather than a crisp arrow, not an actual button background. */
+.quote_box__controls-arrow .slider__controls-arrow-button:hover svg path {
+  fill: #17252f;
+}
+
+.quote_box__controls-arrow .slider__controls-arrow-button:hover svg circle {
+  stroke: #17252f;
+  fill: none;
 }
 
 @media (max-width: 1279px) {
   .quote_box__controls-arrow {
+    position: static;
+    transform: none;
+    width: auto;
+    flex-direction: row;
     margin-top: 20px;
     justify-content: center;
+    gap: 20px;
+  }
+
+  .quote_box__controls-arrow svg {
+    transform: none;
   }
 }
 
@@ -974,12 +1086,21 @@ body .nl__right .gform_wrapper form .gform_footer input:hover {
   top: 50%;
   right: 2.34375vw;
   transform: translateY(-50%);
+  width: 2.65625vw; /* same width as .quote_box__controls-arrow above, so
+                        both boxes share one center line instead of each
+                        centering around its own, differently-sized content */
   padding: 0;
   z-index: 10;
 }
 
 .quote_box__controls-dots .slick-dots {
+  position: static; /* site.css's own .slick-dots is absolute (left/bottom,
+                        meant for the card slider) - unset so it sits in
+                        normal flow, centered by the parent div above */
+  left: auto;
+  bottom: auto;
   flex-direction: column;
+  align-items: center;
 }
 
 .quote_box__controls-dots .slick-dots li {
@@ -990,6 +1111,7 @@ body .nl__right .gform_wrapper form .gform_footer input:hover {
   .quote_box__controls-dots {
     position: static;
     transform: none;
+    width: auto;
     margin-top: 15px;
   }
 
