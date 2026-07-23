@@ -798,6 +798,17 @@ body .nl__right .gform_wrapper form .gform_footer input:hover {
   }
 }
 
+/* Homepage hero copy container: site.css sets this to 41.66667vw (800px
+   at the 1920 baseline) - narrowed to 750px (39.0625vw). Scoped to
+   min-width:1280px so it doesn't clobber site.css's own <=1279px (440px,
+   a different fixed tablet width) or <=767px (full-width, stacked below
+   the video) breakpoints, which stay untouched. */
+@media (min-width: 1280px) {
+  .hero__item__copy {
+    max-width: 39.0625vw;
+  }
+}
+
 /* Hero description text: the homepage's supporting line ("Make the
    Medieval Mile Museum...") switched from a <p> to an <h5> in the markup
    (h4 was tried first but read too large next to the heading above it).
