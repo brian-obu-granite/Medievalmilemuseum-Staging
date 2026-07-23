@@ -141,6 +141,7 @@
   h3 { font-size: 2.8125vw; }   /*  54px */
   h4 { font-size: 2.29167vw; }  /*  44px */
   h6 { font-size: 1.40625vw; }  /*  27px */
+  .h6 { font-size: 1.40625vw; } /*  27px - override site.css .h6 class rule */
 }
 
 /* h3 rung mobile ladder: matches body .nl__heading (the rung's one
@@ -158,11 +159,23 @@
 @media (max-width: 767px)  { h4 { font-size: 36px; } }
 
 /* h6 rung mobile ladder: matches .ic__heading__pink's existing ladder
-   (the rung's main member). */
-@media (max-width: 1279px) { h6 { font-size: 26px; } }
-@media (max-width: 1199px) { h6 { font-size: 24px; } }
-@media (max-width: 991px)  { h6 { font-size: 22px; } }
-@media (max-width: 767px)  { h6 { font-size: 20px; } }
+   (the rung's main member). Also override .h6 class from site.css. */
+@media (max-width: 1279px) {
+  h6 { font-size: 26px; }
+  .h6 { font-size: 26px; }
+}
+@media (max-width: 1199px) {
+  h6 { font-size: 24px; }
+  .h6 { font-size: 24px; }
+}
+@media (max-width: 991px)  {
+  h6 { font-size: 22px; }
+  .h6 { font-size: 22px; }
+}
+@media (max-width: 767px)  {
+  h6 { font-size: 20px; }
+  .h6 { font-size: 20px; }
+}
 
 /* Inner-page banner titles (h1, e.g. "Explore", "What's On"): site.css
    sizes .page-banner__copy h1 at 3.64583vw (70px) at higher specificity
