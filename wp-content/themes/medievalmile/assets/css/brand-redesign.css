@@ -187,11 +187,17 @@
 }
 
 /* h3/h4/h6 switch from Bartender (inherited from the generic .h1-.h6 rule
-   above, same as every other heading level) to the real Macho Semibold. */
+   above, same as every other heading level) to the real Macho Semibold.
+   h6 also gets normalized line-height (1.25) for consistent spacing,
+   since it's used for longer text like testimonial copy. */
 .h3, h3,
 .h4, h4,
 .h6, h6 {
   font-family: Macho-Semibold;
+}
+
+h6, .h6 {
+  line-height: 1.25;
 }
 
 /* Card headings ("Opening Hours & Prices" etc., now h5): the one h5-rung
