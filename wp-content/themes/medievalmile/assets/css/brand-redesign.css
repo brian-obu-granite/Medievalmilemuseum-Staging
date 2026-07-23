@@ -204,15 +204,6 @@ h6, .h6 {
 /* Card headings ("Opening Hours & Prices" etc., now h5) use Macho-Semibold
    via the h5 rule above. Size already matches the 32px rung. */
 
-/* Component-specific h5 rules: override fonts to Macho-Semibold for consistency */
-.cg__head h5 {
-  font-family: Macho-Semibold;
-}
-
-.cta__sub-head h5 {
-  font-family: Macho-Semibold;
-}
-
 /* .quote_box__sub-heading (the testimonial attribution, e.g. "Jaime,
    Washington") is an h4 but - like .page-banner__copy h1 for
    letter-spacing above - site.css redundantly re-declares its own
