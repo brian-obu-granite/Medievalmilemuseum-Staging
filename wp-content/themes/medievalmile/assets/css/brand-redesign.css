@@ -12,10 +12,14 @@
        (the real, licensed headline font - dist/fonts/Bartender-
        SemiCondensedSans.ttf, confirmed against the brand guide)
      - Montserrat-SemiBold / Montserrat-Medium -> Baloo 2     (sub-heads/nav/buttons - placeholder, real Macho not yet licensed)
-     - SourceSerifPro-Regular / -Semibold      -> Nunito Sans (body copy - placeholder, real Tenon not yet licensed)
-   Swap the remaining two @font-face src URLs for the real Macho/Tenon
-   webfont files once licensed, following the same pattern as Bartender
-   below. */
+     - SourceSerifPro-Regular                  -> Macho Semibold (dist/fonts/Macho-Semibold.otf) -
+       SourceSerifPro-Regular's only real usage is .page-banner__copy__description/
+       .hero__item__copy__description-style hero taglines, not actual body
+       copy, so it's no longer the placeholder-for-Tenon slot - it's the
+       same real Macho file used for h3/h4 below.
+     - SourceSerifPro-Semibold                 -> Nunito Sans (card/blog titles - placeholder, real Tenon not yet licensed)
+   Swap the remaining @font-face src URL for the real Tenon webfont file
+   once licensed, following the same pattern as Bartender/Macho above. */
 
 @font-face {
   font-family: Montserrat-ExtraBold;
@@ -51,7 +55,7 @@
 
 @font-face {
   font-family: SourceSerifPro-Regular;
-  src: url(https://fonts.gstatic.com/s/nunitosans/v19/pe1mMImSLYBIv1o4X1M8ce2xCx3yop4tQpF_MeTm0lfGWVpNn64CL7U8upHZIbMV51Q42ptCp5F5bxqqtQ1yiU4G1ilntA.ttf) format("truetype");
+  src: url(../../dist/fonts/Macho-Semibold.otf) format("opentype");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -66,13 +70,17 @@
 }
 
 /* Real Macho Semibold (dist/fonts/Macho-Semibold.otf) - licensed via Adobe
-   Fonts desktop activation, not the shared Montserrat-SemiBold/-Medium
-   family used for nav/buttons elsewhere (that's still on the Baloo 2
-   placeholder). Scoped to its own family name and applied only to h3/h4
-   below, per request - deliberately not touched anywhere else until a
-   redistributable license (or a free alternative) is sourced for the
-   client's own site once live, since an Adobe Fonts desktop activation
-   isn't licensed for shipping the file on a public server long-term. */
+   Fonts desktop activation. Kept as its own family name (rather than
+   folded into the shared Montserrat-SemiBold/-Medium used for nav/buttons,
+   which is still on the Baloo 2 placeholder) so it can be applied
+   selectively: h3/h4 below, and separately reused as the SourceSerifPro-
+   Regular @font-face src above for the hero/page-banner tagline text
+   (that font-family's only real usage on the site - not actual body copy,
+   so it's no longer serving as the Tenon placeholder). Not touched
+   anywhere else until a redistributable license (or a free alternative)
+   is sourced for the client's own site once live, since an Adobe Fonts
+   desktop activation isn't licensed for shipping the file on a public
+   server long-term. */
 @font-face {
   font-family: Macho-Semibold;
   src: url(../../dist/fonts/Macho-Semibold.otf) format("opentype");
@@ -790,26 +798,35 @@ body .nl__right .gform_wrapper form .gform_footer input:hover {
   }
 }
 
-/* Hero description ("Make the Medieval Mile Museum...") switched from a
-   <p> to an <h5> in the markup (h4 was tried first but read too large
-   next to the heading above it - h5 is the better fit). h5 isn't part of
-   the shared h3/h4 -> Macho Semibold rule above, so font-family is set
-   explicitly here instead of broadening that rule to every h5 site-wide.
-   letter-spacing still comes for free from the shared h1-h6 rule further
-   up, which already covers h5.
-   Font-size intentionally matches the real h5-equivalent target
-   (site.css's own .h5,h5: 1.66667vw desktop = 32px at 1920, then 30px/
-   26px/24px at its <=1279px/991px/767px breakpoints) rather than the old
-   p tag's larger size - the whole point of the h4->h5 change was to drop
-   to that smaller, correctly-proportioned scale, not just relabel the tag
-   while keeping the old size. White colour + shadow (for legibility over
-   the video) and the mobile-only near-black override (once the section
-   switches to a solid background) still need to be replicated here since
-   site.css's original rules were written for a <p>, which no longer
-   matches now that the tag changed. */
+/* Hero description text: the homepage's supporting line ("Make the
+   Medieval Mile Museum...") switched from a <p> to an <h5> in the markup
+   (h4 was tried first but read too large next to the heading above it).
+   Every inner page's hero banner has the equivalent line
+   (.page-banner__copy__description), still a plain <p> there - rather
+   than keep two separate rules that could drift apart, both selectors
+   share this one rule so a future style change to either applies to
+   both. h5/p aren't part of the shared h3/h4 -> Macho Semibold rule
+   above, so font-family is set explicitly here. letter-spacing on the
+   homepage's h5 still comes for free from the shared h1-h6 rule further
+   up (doesn't apply to the inner-page <p>, which was never part of that
+   rule).
+   Font-size matches the real h5-equivalent target (site.css's own
+   .h5,h5: 1.66667vw desktop = 32px at 1920, then 30px/26px/24px at its
+   <=1279px/991px/767px breakpoints) rather than either component's
+   original, larger p-based size. White colour + shadow (for legibility
+   over the hero image/video) and the mobile-only near-black override
+   (once each hero switches to a solid background) are shared too.
+   Margin/padding are intentionally NOT merged - each component's
+   surrounding markup is different (the homepage hero needs margin:0/
+   padding:0 to cancel the generic h5 rule's own spacing; the inner-page
+   banner keeps site.css's original spacing under its h1). */
 .hero__item__copy__description h5 {
   margin: 0;
   padding: 0;
+}
+
+.hero__item__copy__description h5,
+.page-banner__copy__description p {
   font-size: 1.66667vw;
   color: #fff;
   text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
@@ -819,19 +836,22 @@ body .nl__right .gform_wrapper form .gform_footer input:hover {
 }
 
 @media (max-width: 1279px) {
-  .hero__item__copy__description h5 {
+  .hero__item__copy__description h5,
+  .page-banner__copy__description p {
     font-size: 30px;
   }
 }
 
 @media (max-width: 991px) {
-  .hero__item__copy__description h5 {
+  .hero__item__copy__description h5,
+  .page-banner__copy__description p {
     font-size: 26px;
   }
 }
 
 @media (max-width: 767px) {
-  .hero__item__copy__description h5 {
+  .hero__item__copy__description h5,
+  .page-banner__copy__description p {
     font-size: 24px;
     color: #161412 !important;
     text-shadow: none !important;
@@ -1406,16 +1426,17 @@ body .nl__right .gform_wrapper form .gform_footer input:hover {
 /* 1. Inner-page hero contrast: .page-banner__copy (used by every inner
    page's hero banner - NOT the homepage, which uses the separate .hero
    component) switches to a solid yellow background (#F3B100) only at
-   <=767px, but its h1/description text stays site.css's default white,
-   making it illegible. The homepage's own .hero__item__copy already
-   patches this exact scenario for itself (color:#161412!important at
-   this same breakpoint) - .page-banner__copy never got the same
-   treatment. Matches that established near-black, scoped to mobile only
-   so the desktop hero (image background, white text over a dark
-   gradient) is untouched. */
+   <=767px, but its h1 text stays site.css's default white, making it
+   illegible. The homepage's own .hero__item__copy already patches this
+   exact scenario for itself (color:#161412!important at this same
+   breakpoint) - .page-banner__copy never got the same treatment. Matches
+   that established near-black, scoped to mobile only so the desktop hero
+   (image background, white text over a dark gradient) is untouched.
+   (.page-banner__copy__description's own mobile contrast override now
+   lives in the shared hero-description rule above, alongside the
+   homepage's.) */
 @media (max-width: 767px) {
-  .page-banner__copy h1,
-  .page-banner__copy__description p {
+  .page-banner__copy h1 {
     color: #161412;
     text-shadow: none;
   }
