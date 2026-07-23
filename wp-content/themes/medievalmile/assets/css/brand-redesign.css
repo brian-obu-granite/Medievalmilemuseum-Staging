@@ -113,10 +113,78 @@
   letter-spacing: -0.02em;
 }
 
+/* ==========================================================================
+   Heading scale consolidation - one size per heading level at the 1920px
+   baseline:
+     Big Text 120px (homepage hero title only - its own component class,
+                     not part of the h1-h6 rungs, untouched here)
+     h1  95px   h2  70px   h3  54px   h4  44px   h5  32px   h6  27px
+   site.css's own generic scale had h1=120, h3=44, h4=38, h6=20 - those
+   four change; h2=70 and h5=32 already matched.
+
+   BARE TAG SELECTORS ONLY, deliberately: this file loads after site.css,
+   so overriding the .h1-.h6 utility-class variants here would beat
+   site.css's equal-specificity component classes on source order alone
+   and accidentally resize elements whose component class is meant to win
+   (e.g. .slider__slide-heading carries the "h4" utility class but is
+   sized by its own class). A bare tag selector keeps the intended
+   hierarchy: any class rule still beats it.
+
+   Fluid values scoped to >=1280px so they don't override site.css's own
+   fixed-px breakpoint ladders on source order; where a rung's mobile
+   ladder needed to change too, it's set explicitly below.
+   h1's sub-1280 ladder is untouched - every h1 on the site is an
+   inner-page banner title, and .page-banner__copy h1's own fixed mobile
+   sizes (45px/40px) still win there at higher specificity. */
+@media (min-width: 1280px) {
+  h1 { font-size: 4.94792vw; }  /*  95px @1920 */
+  h3 { font-size: 2.8125vw; }   /*  54px */
+  h4 { font-size: 2.29167vw; }  /*  44px */
+  h6 { font-size: 1.40625vw; }  /*  27px */
+}
+
+/* h3 rung mobile ladder: matches body .nl__heading (the rung's one
+   current member, which itself wins via its own higher-specificity rule -
+   this covers any future bare h3). */
+@media (max-width: 1279px) { h3 { font-size: 50px; } }
+@media (max-width: 991px)  { h3 { font-size: 45px; } }
+@media (max-width: 767px)  { h3 { font-size: 40px; } }
+
+/* h4 rung mobile ladder: carries over the old bare-h3 ladder (44/40/36),
+   so the body subheads retagged h3->h4 keep their exact previous sizes
+   at every breakpoint. */
+@media (max-width: 1279px) { h4 { font-size: 44px; } }
+@media (max-width: 991px)  { h4 { font-size: 40px; } }
+@media (max-width: 767px)  { h4 { font-size: 36px; } }
+
+/* h6 rung mobile ladder: matches .ic__heading__pink's existing ladder
+   (the rung's main member). */
+@media (max-width: 1279px) { h6 { font-size: 26px; } }
+@media (max-width: 1199px) { h6 { font-size: 24px; } }
+@media (max-width: 991px)  { h6 { font-size: 22px; } }
+@media (max-width: 767px)  { h6 { font-size: 20px; } }
+
+/* Inner-page banner titles (h1, e.g. "Explore", "What's On"): site.css
+   sizes .page-banner__copy h1 at 3.64583vw (70px) at higher specificity
+   than the bare h1 rung above, so the 95px rung needs re-asserting here.
+   Scoped to >=1280px so site.css's own 45px/40px mobile values still
+   apply below. */
+@media (min-width: 1280px) {
+  .page-banner__copy h1 { font-size: 4.94792vw; }  /* 95px @1920 */
+}
+
 /* h3/h4 switch from Bartender (inherited from the generic .h1-.h6 rule
    above, same as every other heading level) to the real Macho Semibold. */
 .h3, h3,
 .h4, h4 {
+  font-family: Macho-Semibold;
+}
+
+/* Card headings ("Opening Hours & Prices" etc., now h5): the one h5-rung
+   member still on SourceSerifPro-SemiBold (the Nunito Sans placeholder -
+   not a brand font), swapped to the same real Macho used by the other
+   sub-head styles. Size already matches the 32px rung. */
+.cg__card__heading {
   font-family: Macho-Semibold;
 }
 
@@ -152,10 +220,11 @@
    exact same font-size - a difference in the two typefaces' own optical
    proportions, not a change in the size value itself (site.css's
    font-size here is untouched by the font-family swap above). Sized down
-   ~15% at each of site.css's existing breakpoints to compensate. Adjust
-   further if this guess over/undershoots. */
+   ~15% at each of site.css's existing breakpoints to compensate - and
+   pinned to exactly 27px at 1920 (1.40625vw), the h6 rung these elements
+   are now retagged to. */
 .ic__heading__pink {
-  font-size: 1.41667vw;
+  font-size: 1.40625vw;
 }
 
 @media (max-width: 1279px) {
@@ -515,10 +584,64 @@ body .nl__right .gform_wrapper form .gform_footer input:hover {
   }
 }
 
+/* Homepage testimonial only: Pig/Wolf swapped to the opposite diagonal
+   (Pig top-left, Wolf bottom-right) per request - same sizing/logic as
+   --top-right/--bottom-left above, just mirrored horizontally. New
+   modifier classes rather than renaming the existing ones, so the other
+   23 quote_box instances site-wide keep their original corners. */
+.quote_box__shape--top-left,
+.quote_box__shape--bottom-right {
+  mix-blend-mode: normal;
+}
+
+/* Pig sized to 448x363 at the 1920px baseline (own aspect ratio, distinct
+   from the shared --top-right sizing above): 448/1920=23.33333vw,
+   363/1920=18.90625vw. */
+.quote_box__shape--top-left {
+  top: 1px;
+  left: -1px;
+  bottom: auto;
+  right: auto;
+  width: 23.33333vw;
+  height: 18.90625vw;
+  object-position: left top;
+}
+
+/* Wolf sized to 502x341 at the 1920px baseline: 502/1920=26.14583vw,
+   341/1920=17.76042vw. */
+.quote_box__shape--bottom-right {
+  top: auto;
+  left: auto;
+  bottom: 1px;
+  right: -1px;
+  width: 26.14583vw;
+  height: 17.76042vw;
+  object-position: right bottom;
+}
+
+@media (max-width: 1279px) {
+  .quote_box__shape--top-left {
+    top: 1px;
+    bottom: auto;
+  }
+}
+
 /* Testimonial copy: site.css hardcodes white text (tuned for the old dark
    "green" background) - unreadable now that .quote_box__bg is gold. */
 .quote_box__description p {
   color: #000000;
+}
+
+/* Homepage testimonial only: copy retagged from <p> to a heading (see the
+   slider rebuild further down) - now an h4 under the consolidated heading
+   scale (44px rung, same visual size it had as an h3 under the old
+   scale). Same black-text fix as the <p> rule above, needed again since
+   it's a different element now. Margin zeroed to match how the <p> sat
+   flush against the heading above it (the generic heading rules give it
+   its own vertical margin otherwise). */
+.quote_box__description h4 {
+  color: #000000;
+  margin: 0;
 }
 
 /* "More Testimonials" CTA: same white-on-dark assumption as the copy above.
@@ -538,8 +661,8 @@ body .nl__right .gform_wrapper form .gform_footer input:hover {
 }
 
 /* Quote box height: site.css leaves .quote_box's height entirely up to its
-   padding + content (no explicit height at all). Sized here to 900px at the
-   1920px design baseline - 900/1920 = 46.875vw - scaling fluidly like
+   padding + content (no explicit height at all). Sized here to 997px at the
+   1920px design baseline - 997/1920 = 51.92708vw - scaling fluidly like
    every other dimension above. Deliberately left unset again below the
    site's usual 1279px fluid/fixed switchover: .quote_box keeps
    overflow:hidden, and a 14-testimonial page has too much length variance
@@ -548,7 +671,24 @@ body .nl__right .gform_wrapper form .gform_footer input:hover {
    breakpoint's current unstyled behaviour) is safer there than guessing a
    fixed value that isn't part of this request. */
 .quote_box {
-  height: 46.875vw;
+  height: 51.92708vw;
+}
+
+/* Homepage testimonial only: site.css's own padding (6.82292vw top/bottom
+   = 131px at 1920) was sized for the old static single-testimonial
+   layout. At the fixed 997px height above, it leaves too little room for
+   .quote_box__inner's now-taller stack (slider content up to ~610px tall
+   for the longest of the 4 reviews, plus the "More Testimonials" link
+   and arrow controls beneath it) - the tallest slide was overflowing
+   .quote_box's own overflow:hidden top edge. Reduced to 3.85417vw (74px
+   at 1920) to free up that room. Scoped to >=1280px (matching the
+   fixed-height rule above, which only applies there too) so it doesn't
+   fight site.css's own <=1279px padding rule, where .quote_box reverts to
+   auto height and this isn't a concern. */
+@media (min-width: 1280px) {
+  #quote_box_4 .quote_box {
+    padding: 3.85417vw 0;
+  }
 }
 
 @media (max-width: 1279px) {
@@ -612,21 +752,21 @@ body .nl__right .gform_wrapper form .gform_footer input:hover {
   display: none;
 }
 
-/* max-width narrowed from site.css's 51.04167vw/980px to 920px at the
-   1920 baseline (920/1920 = 47.91667vw), fixed 920px below 1279px to
-   mirror site.css's own fluid/fixed switchover. */
+/* max-width set to 996px at the 1920 baseline (996/1920 = 51.875vw),
+   fixed 996px below 1279px to mirror site.css's own fluid/fixed
+   switchover. */
 .quote_box__inner {
   height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;
   text-align: left;
-  max-width: 47.91667vw;
+  max-width: 51.875vw;
 }
 
 @media (max-width: 1279px) {
   .quote_box__inner {
-    max-width: 920px;
+    max-width: 996px;
   }
 }
 
@@ -696,6 +836,158 @@ body .nl__right .gform_wrapper form .gform_footer input:hover {
    doesn't need that lopsided margin. */
 .quote_box__description {
   margin: 0;
+}
+
+/* Homepage testimonial: remove the section's own bottom padding (site.css's
+   shared .module padding, 7.8125vw desktop / 50px / 60px at the two mobile
+   breakpoints). Scoped to the homepage's own quote_box_4 instance, not the
+   reusable .quote_box__sec class, since the same testimonial block is
+   reused as a mid-page section on several other pages where the default
+   spacing is still wanted. */
+#quote_box_4 .quote_box__sec {
+  padding-bottom: 0;
+}
+
+/* ==========================================================================
+   Homepage testimonial: redesigned as a slick-powered slider cycling
+   through several reviews, instead of one static quote. Reuses the site's
+   existing slick.js setup, the same custom arrow buttons
+   (.slider__controls-arrow-button, borrowed from the "Explore the Museum"
+   card slider) and the same dot styling (.slider__controls-dots) used
+   elsewhere on the site, so no new visual language is introduced - just
+   a new instance of an existing pattern, scoped to the homepage's own
+   quote_box_4 instance. The other 23 quote_box instances site-wide stay
+   single-testimonial, unchanged.
+   ========================================================================== */
+
+/* Before slick initialises (or if JS fails), only the first slide is
+   meant to show - site.css's own .slick-slide{display:none} only takes
+   over once slick adds .slick-initialized, so without this every slide
+   would render stacked on top of each other in the meantime. */
+.quote_box__slider:not(.slick-initialized) .quote_box__slide + .quote_box__slide {
+  display: none;
+}
+
+/* site.css forces .slick-track{display:flex!important} unconditionally
+   (written for the variableWidth card slider elsewhere on the site) - as
+   a flex item, .slick-slide's default min-width:auto means it can't
+   shrink narrower than its own content's natural width. This slider
+   isn't variableWidth (every slide should just fill the box, one at a
+   time), but on a narrow viewport an unwrapped heading (e.g. "Brilliant
+   and Worth Doing!" in the all-caps H2 headline font) is wider than the
+   box, so the flex item - and the whole slide - was overflowing off the
+   right edge instead of wrapping. min-width:0 lets it shrink to the
+   track's actual width so its text wraps normally again; width:100%
+   keeps it filling that width instead of collapsing to content size. */
+.quote_box__slider .slick-slide {
+  min-width: 0;
+  width: 100%;
+}
+
+/* Slide switching was top-anchored instead of using the whole box: with
+   fade transitions and no adaptiveHeight, .slick-list/.slick-track/
+   .slick-slide only take on the height of their in-flow content
+   (whichever slide is currently "live" in normal flow), which varies a
+   lot between the 4 testimonials (the longest is over twice the
+   shortest). site.css's own height:100%/inherit rules for these three
+   elements exist, but are scoped to other components (.slider
+   .slick-track/.slick-slide for the card slider, .ic__img__slider
+   .slick-list/.slick-track for the gallery) and never reach this one, so
+   the full 100% chain needs setting out again here. Shorter slides ended
+   up pinned to the top of the leftover space rather than centered in it,
+   and the whole box visually reflowed slide to slide.
+   flex:1 lets .quote_box__slider claim all the vertical space
+   .quote_box__inner (a centered flex column) isn't using for the
+   "More Testimonials" link/arrows/dots, so it consistently fills the box
+   regardless of which slide is active. Each .quote_box__slide is then
+   its own flex column, centering its own heading/copy/attribution within
+   that same fixed height every time, instead of drifting with content
+   length. */
+.quote_box__slider {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.quote_box__slider .slick-list,
+.quote_box__slider .slick-track {
+  height: 100%;
+}
+
+.quote_box__slide {
+  height: 100%;
+  display: flex !important;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* Homepage testimonial only, desktop only: the decorative quote-mark
+   glyph (.quote_box__heading:before, set up above) sits above and to the
+   left of the heading's own box (top:-5vw;left:-10vw) - against this
+   instance's fixed-height, slider-driven .quote_box it pokes out above
+   the box's own overflow:hidden top edge, leaving only a clipped sliver
+   of the icon visible. Hidden here only; the other 23 quote_box instances
+   (shorter, single-testimonial, content-driven height) keep the icon, and
+   so does this same instance at <=1279px, where .quote_box reverts to
+   auto height and the icon's own mobile position rule (further up) is
+   already sized to fit without clipping. */
+@media (min-width: 1280px) {
+  #quote_box_4 .quote_box__heading:before {
+    display: none;
+  }
+}
+
+.quote_box__controls-arrow {
+  display: flex;
+  margin-top: 1.5625vw;
+}
+
+@media (max-width: 1279px) {
+  .quote_box__controls-arrow {
+    margin-top: 20px;
+    justify-content: center;
+  }
+}
+
+/* Dots: reuses .slider__controls-dots's existing dot/active-state styling
+   wholesale (site.css), just repositioned to the box's right edge per the
+   reference and stacked vertically instead of its default horizontal row.
+   Positioned against .quote_box itself - the same positioning context
+   Pig/Wolf already use - so it's independent of the copy column's own
+   max-width/flex layout. Below the 1279px fluid/fixed switchover, the
+   copy column already centers itself and there isn't enough width to
+   spare down the right edge, so the dots drop into normal flow instead:
+   a plain centered row under the arrows. */
+.quote_box__controls-dots {
+  position: absolute;
+  top: 50%;
+  right: 2.34375vw;
+  transform: translateY(-50%);
+  padding: 0;
+}
+
+.quote_box__controls-dots .slick-dots {
+  flex-direction: column;
+}
+
+.quote_box__controls-dots .slick-dots li {
+  margin: 0.41667vw 0;
+}
+
+@media (max-width: 1279px) {
+  .quote_box__controls-dots {
+    position: static;
+    transform: none;
+    margin-top: 15px;
+  }
+
+  .quote_box__controls-dots .slick-dots {
+    flex-direction: row;
+    justify-content: center;
+  }
+
+  .quote_box__controls-dots .slick-dots li {
+    margin: 0 8px;
+  }
 }
 
 /* ==========================================================================
