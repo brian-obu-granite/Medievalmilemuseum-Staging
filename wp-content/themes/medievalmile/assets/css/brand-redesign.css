@@ -105,7 +105,7 @@
 .h3, h3,
 .h4, h4,
 .h5, h5,
-.h6, h6 {
+h6 {
   letter-spacing: -0.02em;
 }
 
@@ -141,7 +141,6 @@
   h3 { font-size: 2.8125vw; }   /*  54px */
   h4 { font-size: 2.29167vw; }  /*  44px */
   h6 { font-size: 1.40625vw; }  /*  27px */
-  .h6 { font-size: 1.40625vw; } /*  27px - override site.css .h6 class rule */
 }
 
 /* h3 rung mobile ladder: matches body .nl__heading (the rung's one
@@ -158,23 +157,18 @@
 @media (max-width: 991px)  { h4 { font-size: 40px; } }
 @media (max-width: 767px)  { h4 { font-size: 36px; } }
 
-/* h6 rung mobile ladder: matches .ic__heading__pink's existing ladder
-   (the rung's main member). Also override .h6 class from site.css. */
+/* h6 rung mobile ladder. */
 @media (max-width: 1279px) {
   h6 { font-size: 26px; }
-  .h6 { font-size: 26px; }
 }
 @media (max-width: 1199px) {
   h6 { font-size: 24px; }
-  .h6 { font-size: 24px; }
 }
 @media (max-width: 991px)  {
   h6 { font-size: 22px; }
-  .h6 { font-size: 22px; }
 }
 @media (max-width: 767px)  {
   h6 { font-size: 20px; }
-  .h6 { font-size: 20px; }
 }
 
 /* Inner-page banner titles (h1, e.g. "Explore", "What's On"): site.css
@@ -192,12 +186,12 @@
 .h3, h3,
 .h4, h4,
 .h5, h5,
-.h6, h6 {
+h6 {
   font-family: Macho-Semibold;
 }
 
 h5, .h5,
-h6, .h6 {
+h6 {
   line-height: 1.25;
 }
 
@@ -234,50 +228,13 @@ h5 {
 
 /* .ic__sub-heading (h4, e.g. "Events & Exhibitions" card labels) was on
    Montserrat-SemiBold (Baloo 2 placeholder) - still applies Macho Semibold
-   via the h4 rule above. .ic__heading__pink (h6 elements like "Visit the
-   Kilkenny Room...") now covered by the h6 rule above, no redundant rule needed.
+   via the h4 rule above.
    Deliberately NOT touching the OneTrust cookie-consent banner's own h3/h4
    elements ("Your Privacy", "Strictly Necessary Cookies", etc.) - that's
    third-party widget markup injected at runtime, not part of the site's
    own heading system. */
 .ic__sub-heading {
   font-family: Macho-Semibold;
-}
-
-/* .ic__heading__pink (e.g. "Visit the Kilkenny Room...") reads noticeably
-   larger in Macho Semibold than it did in the old placeholder font at the
-   exact same font-size - a difference in the two typefaces' own optical
-   proportions, not a change in the size value itself (site.css's
-   font-size here is untouched by the font-family swap above). Sized down
-   ~15% at each of site.css's existing breakpoints to compensate - and
-   pinned to exactly 27px at 1920 (1.40625vw), the h6 rung these elements
-   are now retagged to. */
-.ic__heading__pink {
-  font-size: 1.40625vw;
-}
-
-@media (max-width: 1279px) {
-  .ic__heading__pink {
-    font-size: 26px;
-  }
-}
-
-@media (max-width: 1199px) {
-  .ic__heading__pink {
-    font-size: 24px;
-  }
-}
-
-@media (max-width: 991px) {
-  .ic__heading__pink {
-    font-size: 22px;
-  }
-}
-
-@media (max-width: 767px) {
-  .ic__heading__pink {
-    font-size: 20px;
-  }
 }
 
 /* ==========================================================================
