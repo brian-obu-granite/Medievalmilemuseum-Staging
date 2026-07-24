@@ -1078,6 +1078,26 @@ body .nl__right .gform_wrapper form .gform_footer input:hover {
   }
 }
 
+/* Freeze at the 1920px design baseline instead of continuing to scale on
+   ultra-wide screens (2560px+): these vw values have no natural upper
+   bound, and past the site's own intended max width, unbounded vw growth
+   on small pixel-precise UI (a 51px icon, a 45px offset) is exactly the
+   kind of thing that produces visible sub-pixel rounding drift between
+   this and the separately-scaled .quote_box__controls-dots below, even
+   though both compute to identical values at every width up to 1920px. */
+@media (min-width: 1920px) {
+  .quote_box__controls-arrow {
+    right: 45px;
+    width: 51px;
+    gap: 140px;
+  }
+
+  .quote_box__controls-arrow .slider__controls-arrow-button {
+    width: 51px;
+    height: 51px;
+  }
+}
+
 /* Dots: reuses .slider__controls-dots's existing dot/active-state styling
    wholesale (site.css), just repositioned to the box's right edge per the
    reference and stacked vertically instead of its default horizontal row.
@@ -1132,6 +1152,22 @@ body .nl__right .gform_wrapper form .gform_footer input:hover {
 
   .quote_box__controls-dots .slick-dots li {
     margin: 0 8px;
+  }
+}
+
+/* Same freeze as .quote_box__controls-arrow above, at the same 1920px
+   baseline - keeps this box's width/right offset an exact pixel match to
+   the arrow's above past that point, rather than two independently
+   vw-scaled values that only coincide by calculation, not by sharing a
+   single fixed value. */
+@media (min-width: 1920px) {
+  .quote_box__controls-dots {
+    right: 45px;
+    width: 51px;
+  }
+
+  .quote_box__controls-dots .slick-dots li {
+    margin: 8px 0;
   }
 }
 
@@ -1983,4 +2019,47 @@ body .nl__right .gform_wrapper form .gform_footer input:hover {
    since no mobile size was specified. */
 .map__wrapper iframe {
   height: 29.6875vw !important;
+}
+
+/* FAQ accordion: site.css turns the question text (and its +/- toggle
+   icon) brand yellow on hover. Keep it black instead - the hover state
+   still has other cues (cursor:pointer, the toggle icon) that it's
+   interactive, without the color change. The .active (already expanded)
+   state's own yellow is untouched - only :hover. */
+.acc__title:hover {
+  color: #161412;
+}
+
+.acc__title:hover:after,
+.acc__title:hover:before {
+  background-color: #161412;
+}
+
+/* "New" badge on What's On cards, flagging a newly-added activity.
+   .cg__card__img is already position:relative (site.css), so this just
+   pins to its top-left corner - no new positioning context needed. */
+.cg__card__badge {
+  position: absolute;
+  top: 0.9375vw;
+  left: 0.9375vw;
+  z-index: 2;
+  padding: 0.4375vw 1.125vw;
+  border-radius: 0;
+  background-color: #F3B100;
+  color: #161412;
+  font-family: Montserrat-SemiBold, sans-serif;
+  font-size: 1vw;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 1279px) {
+  .cg__card__badge {
+    top: 12px;
+    left: 12px;
+    padding: 7px 17px;
+    font-size: 16px;
+  }
 }
