@@ -88,21 +88,112 @@
     }
   ];
 
-  console.log('Testimonials data loaded:', testimonials.length, 'items');
-  renderTestimonials(testimonials);
+  // Testimonials unique to one of the 9 non-homepage/non-testimonials pages
+  // that also embed the shared #quote_box_4 carousel component. Each of
+  // these pages shows its own testimonial as slide 1, then fills the
+  // remaining 3 slides from the homepage's own first 4 (see
+  // getSlidesForPage below) - a value here (rather than a title string
+  // referencing the master list above) means the content only exists on
+  // that one page; a string means "reuse this exact master-list entry"
+  // (its own testimonial happens to already be one of the 14).
+  const PAGE_OWN_TESTIMONIAL = {
+    'education': {
+      "title": "Our tour guide was fantastic.",
+      "copy": "We recently visited the Medieval Mile Museum on a class trip and were blown away! She pitched the tour at exactly the right level for the children and the information she provided was hugely interesting. The children loved learning about the Black Death, guessing at the origins of the artefacts and discussing the figures represented in the effigies. They enjoyed the thrill of crossing the glass panels set into the floors and are still talking about the tombs in the graveyard. The tour culminates in a Lego Hunt which gives the children the opportunity to race around in an effort to find all of the listed Lego characters. There wasn't a corner of the museum left unexplored by the class and the overall feeling at the end of the tour was one of high good humour. I highly recommend a visit to the Medieval Mile Museum. Thanks to all of the amazing and highly professional staff involved.",
+      "attribution": "Ms. Mackey, Class Teacher"
+    },
+    'events-exhibitions': 'An Hour Well Spent',
+    'explore': 'A Must See Attraction!',
+    'venue-hire': {
+      "title": "Perfect venue for April Sounds",
+      "copy": "The Medieval Mile Museum was the perfect venue for April Sounds. The venue gave all in attendance a true Kilkenny welcome, immersing the audience into Kilkenny's culture and history while providing a beautiful setting for the artists to showcase their music. The sound was incredible. The outdoor space was ideal for pop up performances throughout the day too. Anne-Marie, Sarah, Grace and all the team at the museum were so helpful and accommodating from the lead up to and on the day of the concerts.",
+      "attribution": "Andrea Keogh, Event Manager"
+    },
+    'medieval-mile-trail': {
+      "title": "Highly recommended.",
+      "copy": "We enjoyed our guided tour around St Mary's and Medieval Kilkenny so much. Our guide was so enthusiastic and knowledgeable - it revealed a different layer to the city that was always there.",
+      "attribution": ""
+    },
+    'events': {
+      "title": "Festival Director Kilkenny Tradfest",
+      "copy": "Kilkenny Tradfest was thrilled to programme concerts with some of Ireland's most highly acclaimed traditional musicians and vocalists in the stunning Medieval Míle Museum. This historic landmark church, beautifully restored, provided a very special atmosphere and backdrop for both performers and audiences and added tremendously to the concert experience.",
+      "attribution": "Marian Flannery"
+    },
+    'admission-opening-hours': 'Amazing Tour of the Medieval Mile!',
+    'weddings': {
+      "title": "Our Wedding",
+      "copy": "Our sincerest thanks to the whole team in the Medieval Mile Museum for making our wedding day so special and memorable for all our guests. Chloë and I both knew that the museum would look incredible for our wedding ceremony. The way the space was able to be transformed for the day was stunning. The ceremony itself went so well. All of our guests have remarked how exceptional the ceremony was and how having it in a place with so much history was so extraordinary. We hope to visit the Museum again for many years to come and will have no hesitation in recommending you all to any friends and family who are getting married.",
+      "attribution": "Chloë & Barry"
+    },
+    'guided-museum-tour': 'A Must See Attraction!'
+  };
 
-  function renderTestimonials(testimonials) {
+  console.log('Testimonials data loaded:', testimonials.length, 'items');
+
+  // Homepage carousel (#quote_box_4) gets the default first-4 UNLESS this
+  // is one of the 9 pages with their own testimonial slotted in as slide 1
+  // - renderPageCarousel handles that case and returns true so the default
+  // doesn't also run and get immediately overwritten.
+  if (!renderPageCarousel(testimonials)) {
+    renderCarousel(testimonials, testimonials.slice(0, 4));
+  }
+
+  // Testimonials page: full list, static (no carousel/arrows/dots/CTA)
+  renderList(testimonials);
+
+  // One of the 9 pages that embed the shared carousel component with their
+  // own testimonial as slide 1 (see PAGE_OWN_TESTIMONIAL above). Detected
+  // by matching the current path against each known page's own folder
+  // name, same way the testimonials-page/homepage split already works.
+  function renderPageCarousel(testimonials) {
+    const path = window.location.pathname;
+    const pageKey = Object.keys(PAGE_OWN_TESTIMONIAL).find(key => path.indexOf('/' + key + '/') !== -1 || path.indexOf('/' + key) === path.length - key.length - 1);
+    if (!pageKey) {
+      return false;
+    }
+
+    let ownTestimonial = PAGE_OWN_TESTIMONIAL[pageKey];
+    if (typeof ownTestimonial === 'string') {
+      ownTestimonial = testimonials.find(t => t.title === ownTestimonial);
+    }
+    if (!ownTestimonial) {
+      return false;
+    }
+
+    const slides = getSlidesForPage(testimonials, ownTestimonial);
+    renderCarousel(testimonials, slides);
+    return true;
+  }
+
+  // Own testimonial first, then the homepage's own first 4, de-duplicated
+  // by title (covers events-exhibitions/admission-opening-hours, whose own
+  // testimonial already IS one of those 4), padding from the rest of the
+  // master list if de-duping ever left fewer than 4.
+  function getSlidesForPage(testimonials, ownTestimonial) {
+    const seen = new Set();
+    const slides = [];
+    [ownTestimonial, ...testimonials.slice(0, 4)].forEach(t => {
+      if (seen.has(t.title) || slides.length >= 4) { return; }
+      seen.add(t.title);
+      slides.push(t);
+    });
+    let i = 4;
+    while (slides.length < 4 && i < testimonials.length) {
+      const t = testimonials[i];
+      if (!seen.has(t.title)) { seen.add(t.title); slides.push(t); }
+      i++;
+    }
+    return slides;
+  }
+
+  function renderCarousel(testimonials, testimonialsToShow) {
     const carouselContainer = document.querySelector('.quote_box__slider');
 
     if (!carouselContainer) {
-      console.error('Carousel container not found');
       return;
     }
 
     console.log('Rendering testimonials. Carousel container found.');
-
-    // Determine which testimonials to show (first 4)
-    const testimonialsToShow = testimonials.slice(0, 4);
 
     // Clear any existing slides
     const existingSlides = carouselContainer.querySelectorAll('.quote_box__slide');
@@ -141,6 +232,55 @@
     } else {
       console.log('jQuery or Slick not available yet');
     }
+  }
+
+  // Testimonials page: same visual "quote_box" card as the homepage carousel
+  // (decorative quote icon, Pig/Wolf art, heading, h5 copy, h4 attribution)
+  // but every testimonial renders as its own static block - no slider, no
+  // arrows/dots, no "More Testimonials" CTA (this page already IS the full
+  // list). Uses the same plain .quote_box__heading (with site.css's generic,
+  // unscoped .quote_box__heading:before icon) as the other 23 single-
+  // testimonial quote_box instances site-wide, rather than the homepage
+  // carousel's standalone .quote_box__quote-icon element - that element only
+  // exists to dodge the carousel's variable slide-height clipping problem,
+  // which doesn't apply here since each card's height is content-driven.
+  function renderList(testimonials) {
+    const listContainer = document.querySelector('.quote_box__list');
+
+    if (!listContainer) {
+      return;
+    }
+
+    console.log('Rendering full testimonials list:', testimonials.length, 'items');
+
+    // Testimonials page lives one level down (/testimonials/), so shared
+    // theme assets need the ../ prefix the homepage doesn't use.
+    const assetPrefix = '../wp-content';
+
+    listContainer.innerHTML = '';
+
+    testimonials.forEach((testimonial, index) => {
+      const item = document.createElement('div');
+      item.className = 'section-quote_box';
+      item.innerHTML = `
+        <section class="module quote_box__sec">
+          <div class="quote_box">
+            <div class="quote_box__inner container">
+              <h2 class="ic__heading h1 quote_box__heading">${escapeHtml(testimonial.title)}</h2>
+              <div class="ic__description quote_box__description">
+                <h5 class="h5">${escapeHtml(testimonial.copy)}</h5>
+              </div>
+              ${testimonial.attribution ? `<h4 class="ic__sub-heading quote_box__sub-heading">${escapeHtml(testimonial.attribution)}</h4>` : ''}
+            </div>
+            <div class="quote_box__bg green"></div>
+            <img class="quote_box__shape quote_box__shape--top-left" src="${assetPrefix}/themes/medievalmile/dist/images/Pig.svg" alt="">
+            <img class="quote_box__shape quote_box__shape--bottom-right" src="${assetPrefix}/themes/medievalmile/dist/images/Wolf.svg" alt="">
+          </div>
+        </section>
+      `;
+      listContainer.appendChild(item);
+      console.log('Added list item', index + 1, ':', testimonial.title);
+    });
   }
 
   // Utility function to escape HTML

@@ -201,6 +201,15 @@ h6, .h6 {
   line-height: 1.25;
 }
 
+/* .bic__copy__item is a dark, semi-transparent overlay card (site.css:
+   background-color:rgba(0,0,0,.75)) sitting on top of a full-bleed photo.
+   site.css already whites-out .ic__heading/.ic__sub-heading/.ic__description p
+   for this context, but a bare h6 tagline (no special class) falls back to
+   the generic h6{color:#000} rule and disappears against the dark overlay. */
+.bic__copy__item h6 {
+  color: #fff;
+}
+
 /* Increase gap between testimonial copy and attribution to 60px */
 h5 {
   margin-bottom: 60px !important;
@@ -703,19 +712,25 @@ body .nl__right .gform_wrapper form .gform_footer input:hover {
   height: 51.92708vw;
 }
 
-/* Homepage testimonial only: site.css's own padding (6.82292vw top/bottom
-   = 131px at 1920) was sized for the old static single-testimonial
-   layout. At the fixed 997px height above, it leaves too little room for
-   .quote_box__inner's now-taller stack (slider content up to ~610px tall
-   for the longest of the 4 reviews, plus the "More Testimonials" link
-   and arrow controls beneath it) - the tallest slide was overflowing
-   .quote_box's own overflow:hidden top edge. Reduced to 3.85417vw (74px
-   at 1920) to free up that room. Scoped to >=1280px (matching the
-   fixed-height rule above, which only applies there too) so it doesn't
-   fight site.css's own <=1279px padding rule, where .quote_box reverts to
-   auto height and this isn't a concern. */
+/* Homepage testimonial carousel + the testimonials page's full list -
+   two instances of the SAME testimonial component (one shows a slider of
+   4, the other every testimonial as a static list; a CSS change to one
+   selector here reaches both, exactly the two, not the other 10 unrelated
+   single-testimonial quote_box sections elsewhere on the site, which keep
+   site.css's own default spacing). site.css's own padding (6.82292vw
+   top/bottom = 131px at 1920) was sized for the old static single-
+   testimonial layout and left too little room once this component's own
+   content got taller (e.g. the homepage carousel's slider stack, up to
+   ~610px for the longest of its 4 reviews, plus the "More Testimonials"
+   link and arrow controls beneath it) - the tallest content was
+   overflowing .quote_box's own overflow:hidden top edge. Reduced to
+   3.85417vw (74px at 1920) for both instances. Scoped to >=1280px
+   (matching the fixed-height rule above, which only applies there too)
+   so it doesn't fight site.css's own <=1279px padding rule, where
+   .quote_box reverts to auto height and this isn't a concern. */
 @media (min-width: 1280px) {
-  #quote_box_4 .quote_box {
+  #quote_box_4 .quote_box,
+  .quote_box__list .quote_box {
     padding: 3.85417vw 0;
   }
 }
@@ -867,13 +882,13 @@ body .nl__right .gform_wrapper form .gform_footer input:hover {
   margin: 0;
 }
 
-/* Homepage testimonial: remove the section's own bottom padding (site.css's
-   shared .module padding, 7.8125vw desktop / 50px / 60px at the two mobile
-   breakpoints). Scoped to the homepage's own quote_box_4 instance, not the
-   reusable .quote_box__sec class, since the same testimonial block is
-   reused as a mid-page section on several other pages where the default
-   spacing is still wanted. */
-#quote_box_4 .quote_box__sec {
+/* Same two-instance component as above (homepage carousel + testimonials
+   page list): remove the section's own bottom padding (site.css's shared
+   .module padding, 7.8125vw desktop / 50px / 60px at the two mobile
+   breakpoints). Not the reusable .quote_box__sec class generally, since
+   the other 10 quote_box instances site-wide keep the default spacing. */
+#quote_box_4 .quote_box__sec,
+.quote_box__list .quote_box__sec {
   padding-bottom: 0;
 }
 
@@ -953,28 +968,28 @@ body .nl__right .gform_wrapper form .gform_footer input:hover {
 }
 
 /* Homepage testimonial (#quote_box_4) only: the shared .quote_box__heading:before
-   icon (used by the other 23 quote_box instances) is positioned relative to
-   the heading's OWN box (top:-5vw;left:-10vw) - fine for those single-
-   testimonial instances, whose heading sits at a fixed spot since the box's
-   height is content-driven. This slider instance is different: .quote_box
-   has a fixed height and .quote_box__inner centers a variable-height stack
-   inside it (4 testimonials, very different copy lengths), so the heading's
-   own vertical position shifts slide to slide - anchoring the icon to it
-   meant it could ride up near/past .quote_box's own overflow:hidden top
-   edge for the longer testimonials, clipping it.
+   icon (used by the other 23 quote_box instances and the testimonials page's
+   full list) looks right but gets clipped here specifically - not by
+   .quote_box's own overflow:hidden (checked - plenty of buffer), but by
+   Slick's own .slick-list{overflow:hidden} (site.css/slick base styles),
+   which wraps this instance's slides since it's the one quote_box turned
+   into a carousel. Anything poking outside a slide via a heading-relative
+   negative offset gets clipped by that carousel viewport, which the other
+   instances never have to contend with.
 
    Fix: hide the shared heading-relative icon here and use a standalone
    .quote_box__quote-icon element instead (HTML), a sibling of
    .quote_box__slider inside .quote_box__slider-wrap - not a child of
    .quote_box__slider itself, since slick.js treats every direct child of
-   the slider element as a slide and would break the carousel.
-   .quote_box__slider-wrap is the positioning context (position:relative,
-   no size/margin of its own), so the icon's top:0 lines up with
-   .quote_box__slider's own top edge exactly, whatever that ends up being -
-   both move together as .quote_box__inner's centering shifts the whole
-   wrap per slide, instead of the icon drifting independently against a
-   fixed guess. It can never clip past .quote_box's own top edge either,
-   since it can't render any higher than the slider it's pinned to. */
+   the slider element as a slide and would break the carousel, and crucially
+   OUTSIDE the .slick-list Slick wraps around .quote_box__slider, so it's
+   never subject to that clip. Sized/positioned to match the shared
+   .quote_box__heading:before rule exactly (13.54167vw x 11.09375vw;
+   top:-5vw;left:-10vw) - here relative to .quote_box__slider-wrap instead
+   of the heading, since .quote_box__slider-wrap's own top-left corner
+   already tracks the heading's (the heading is the first content in
+   whichever slide is active), without the per-slide drift risk of
+   anchoring to the heading directly. */
 @media (min-width: 1280px) {
   #quote_box_4 .quote_box__heading:before {
     display: none;
@@ -993,19 +1008,14 @@ body .nl__right .gform_wrapper form .gform_footer input:hover {
   .quote_box__quote-icon {
     display: block;
     position: absolute;
-    top: 0;
-    left: -230px; /* 200px icon width + 30px gap, so it sits fully to the
-                      left of .quote_box__inner's edge with clean spacing
-                      instead of overlapping it */
-    width: 200px;
-    height: 163px; /* matches the icon-quote.svg's native 107:87 aspect ratio */
+    top: -5vw;
+    left: -10vw;
+    width: 13.54167vw;
+    height: 11.09375vw;
     background-image: url(../../dist/images/icon-quote.svg);
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;
-    z-index: 2; /* above .quote_box__shape's z-index:1 (site.css), below
-                    .quote_box__inner's own z-index:3 (site.css) so the
-                    heading text still reads in front where they overlap */
   }
 }
 
