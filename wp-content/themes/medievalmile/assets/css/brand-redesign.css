@@ -2021,6 +2021,23 @@ body .nl__right .gform_wrapper form .gform_footer input:hover {
   height: 29.6875vw !important;
 }
 
+/* Weddings page: the "GET IN TOUCH" section (id="two_column_content_2")
+   is the same shared markup as the contact page's copy, so it can't be
+   unscoped from .page-content's default top padding without also
+   affecting the contact page (and the events page, which reuses the
+   same id too). Scoped to the weddings page's own body class
+   (page-id-497) so only this instance loses its top padding. */
+body.page-id-497 #two_column_content_2 .page-content {
+  padding-top: 0;
+}
+
+/* Events page: same shared "GET IN TOUCH" section, scoped to this page's
+   own body class (page-id-753) so only this instance loses its bottom
+   padding - contact and weddings keep theirs. */
+body.page-id-753 #two_column_content_2 .page-content {
+  padding-bottom: 0;
+}
+
 /* FAQ accordion: site.css turns the question text (and its +/- toggle
    icon) brand yellow on hover. Keep it black instead - the hover state
    still has other cues (cursor:pointer, the toggle icon) that it's
