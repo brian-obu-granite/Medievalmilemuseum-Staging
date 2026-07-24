@@ -1989,3 +1989,382 @@ body.page-id-753 #two_column_content_2 .page-content {
     font-size: 16px;
   }
 }
+
+/* ==========================================================================
+   "Admission & Opening Hours" / "Membership Options" accordion component
+
+   Two live instances of this component pattern:
+   - .cta.admission - "Admission & Opening Hours" style content (two
+     side-by-side accordion columns: tour pricing/times / Getting Here).
+     Live on: explore, plan-your-visit, guided-museum-tour,
+     medieval-mile-trail, events-exhibitions (the last three show only
+     their own single relevant tour item in the left column, with the
+     other tour items omitted from the markup entirely rather than
+     hidden via CSS).
+   - .cta.membership - "Membership Options" (annual-membership), 5
+     membership tiers split 3+2 across two columns.
+
+   Shared visual language (accordion box border, card dividers, +/- icon
+   mechanics, panel styling, wine button) lives under .cta--accordion,
+   a class added to every instance's wrapping <div class="cta ...">
+   alongside its own modifier class. Only genuinely different bits (the
+   two-column split, the column sub-headings, the bottom disclaimer note)
+   stay scoped to .cta.admission specifically.
+
+   Reuses the exact same .acc__title/.acc__card/.acc__panel class names
+   as the site's existing FAQ accordion (site.css/js.js) - deliberate,
+   since the sitewide accordion click-handler is class-based, not
+   page-scoped, so this markup gets working expand/collapse for free
+   with no new JS. Layers on top of - never touches - that existing
+   light-themed FAQ instance, since everything here is scoped under
+   .cta--accordion, which the FAQ page never carries.
+
+   One important departure from a plain copy of the FAQ pattern: .acc__row
+   is deliberately placed as ONE shared wrapper around BOTH columns
+   together (not one per column), because the click-handler scopes
+   "close every other open panel" to .closest(".acc__row") - sharing a
+   single .acc__row means only one item is ever open across the whole
+   component at a time, not one-open-per-column independently. Each
+   column's own visual bordered box is a separate class, .acc__box. */
+
+.cta--accordion .acc__box {
+  border: 1px solid #fff;
+  padding: 1.5625vw; /* 30px @ 1920, matches .container's own 30px gutter unit */
+  display: flex;
+  flex-direction: column;
+}
+
+@media (max-width: 1279px) {
+  .cta--accordion .acc__box {
+    padding: 30px;
+  }
+}
+
+.cta--accordion .acc__card {
+  background: none;
+  margin: 0;
+  padding: 0;
+}
+
+.cta--accordion .acc__card + .acc__card {
+  border-top: 1px solid #fff;
+  margin-top: 2.08333vw; /* 40px @ 1920 */
+  padding-top: 1.5625vw; /* 30px @ 1920 - reduced from 40px, the other
+                             10px moved to .acc__title's own padding
+                             below, so the clickable target grows without
+                             changing the total visual gap between the
+                             divider line and the title text */
+}
+
+@media (max-width: 1279px) {
+  .cta--accordion .acc__card + .acc__card {
+    margin-top: 40px;
+    padding-top: 30px;
+  }
+}
+
+/* .acc__title: FAQ's version is a single-line label with the +/- icon
+   absolutely-positioned using magic-number offsets tuned to its own fixed
+   padding. This component's title can be a two-line block (h6 + time
+   caption) of variable height, so the icon lives in its own
+   flex-positioned toggle element instead - same plus/minus technique
+   (two bars, one hidden on .active), just laid out with flexbox rather
+   than page-specific coordinates. */
+.cta--accordion .acc__title {
+  display: flex;
+  align-items: center; /* centers the icon against the full title (+
+                           subtitle, where present) block's height, not
+                           just the title line */
+  justify-content: flex-start;
+  gap: 1.04167vw; /* 20px @ 1920 - floor gap, only matters if the toggle's
+                     own margin-left:auto push (below) is ever compressed */
+  padding: .52083vw 0; /* 10px @ 1920 - grows the clickable area beyond
+                          the tight text bounding box (previously 0);
+                          .acc__card + .acc__card's own padding-top was
+                          reduced by the same 10px so the total visual
+                          gap between the divider line and the title text
+                          is unchanged - only the split between "dead
+                          space" and "clickable space" moved */
+  cursor: pointer;
+  font-family: inherit;
+}
+
+/* Suppress FAQ's own absolutely-positioned +/- pseudo-elements (site.css's
+   .acc__title:before/:after) - this component draws its icon on the
+   dedicated .acc__toggle element below instead. */
+.cta--accordion .acc__title:before,
+.cta--accordion .acc__title:after {
+  display: none;
+}
+
+.cta--accordion .acc__title h6 {
+  color: #fff;
+  margin: 0 0 .26042vw; /* 5px @ 1920 */
+}
+
+.cta--accordion .acc__title .acc__time {
+  display: block;
+  font-family: Montserrat-Medium; /* renders as Baloo 2 Medium */
+  font-weight: 400;
+  font-size: 16px; /* fixed baseline for every width up to 1920 - body-copy
+                       sizes are already close to the comfortable-reading
+                       floor, so unlike the larger heading rungs this one
+                       must NOT keep shrinking below its 1920 baseline */
+  color: #fff;
+  line-height: 1.25;
+}
+
+@media (min-width: 1920px) {
+  .cta--accordion .acc__title .acc__time {
+    font-size: .83333vw; /* scales up only past 1920, for ultra-wide screens */
+  }
+}
+
+/* Toggle icon: 24x24px, plus/minus via two pseudo-element bars.
+   margin-left:auto pins it to the opposite end of the row from the title
+   text, regardless of how long the title is. */
+.cta--accordion .acc__toggle {
+  position: relative;
+  flex: none;
+  width: 24px;
+  height: 24px;
+  margin-left: auto;
+}
+
+.cta--accordion .acc__toggle:before,
+.cta--accordion .acc__toggle:after {
+  content: "";
+  display: block;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  background-color: #fff;
+  transition: opacity .25s ease;
+}
+
+.cta--accordion .acc__toggle:after {
+  width: 16px;
+  height: 2px;
+  transform: translate(-50%, -50%);
+}
+
+.cta--accordion .acc__toggle:before {
+  width: 2px;
+  height: 16px;
+  transform: translate(-50%, -50%);
+}
+
+.cta--accordion .acc__title.active .acc__toggle:before {
+  opacity: 0;
+}
+
+/* Panel content: the translucent dark box used for pricing breakdowns,
+   directions text, and membership benefit descriptions alike - same
+   rgba(255,255,255,.12) overlay throughout. */
+.cta--accordion .acc__panel {
+  display: none;
+}
+
+.cta--accordion .acc__panel__copy {
+  background-color: rgba(255, 255, 255, .12);
+  padding: 1.5625vw; /* 30px @ 1920 */
+  margin-top: 2.08333vw; /* 40px @ 1920 */
+  display: flex;
+  flex-direction: column;
+  gap: 2.08333vw;
+}
+
+@media (max-width: 1279px) {
+  .cta--accordion .acc__panel__copy {
+    padding: 30px;
+    margin-top: 40px;
+    gap: 40px;
+  }
+}
+
+.cta--accordion .acc__panel__copy p,
+.cta--accordion .acc__panel__copy ul {
+  margin: 0;
+  padding: 0;
+  font-family: Montserrat-Medium; /* Baloo 2 Medium */
+  font-weight: 400;
+  font-size: 18px; /* fixed baseline up to 1920 - see .acc__time above for why */
+  line-height: 1.5;
+  color: #fff;
+  word-break: break-word;
+}
+
+@media (min-width: 1920px) {
+  .cta--accordion .acc__panel__copy p,
+  .cta--accordion .acc__panel__copy ul {
+    font-size: .9375vw; /* scales up only past 1920, for ultra-wide screens */
+  }
+}
+
+.cta--accordion .acc__panel__copy p strong {
+  font-family: Montserrat-SemiBold; /* Baloo 2 SemiBold */
+  font-weight: 400;
+}
+
+/* Benefit lists (e.g. membership tiers with multiple perks): a real
+   bulleted list instead of <br>-separated lines in one paragraph, so a
+   long item wrapping onto a second line can't be mistaken for the next
+   item starting - each item keeps its own marker and hanging indent
+   regardless of how many lines it wraps to. */
+.cta--accordion .acc__panel__copy ul {
+  list-style: disc;
+  padding-left: 1.14583vw; /* 22px @ 1920 - room for the marker + hanging indent */
+}
+
+.cta--accordion .acc__panel__copy li {
+  margin: 0;
+}
+
+.cta--accordion .acc__panel__copy li + li {
+  margin-top: .52083vw; /* 10px @ 1920 */
+}
+
+.cta--accordion .acc__panel__copy .acc__divider {
+  border: none;
+  border-top: 1px solid #fff;
+  margin: 0;
+}
+
+/* CTA button (e.g. "Book Now"): reuses the site's existing .btn (same
+   padding/size/typeface as every other button), with a new colour
+   modifier pulling the exact "wine" (#781041) already established
+   elsewhere (.slider__slide-link.wine, .copybg.wine) rather than the
+   default .btn magenta (#9A1356) or a new one-off colour. */
+.cta--accordion .btn--wine {
+  background-color: #781041;
+  margin: 0;
+  align-self: flex-start;
+}
+
+/* ==========================================================================
+   SHARED: two-column split (used by .cta.admission and .cta.membership)
+   ========================================================================== */
+
+/* Two-column layout: reuses .cta__row (already the standard flex row for
+   this component elsewhere on the site) with a new column class, since
+   the existing .cta__col is built for the old 3-equal-column list
+   (width:33.333%) and doesn't fit a 2-column redesign.
+
+   Horizontal gap between the two columns: 2.08333vw (40px @ 1920) - the
+   same gap token already used for vertical spacing throughout this
+   component (column heading to box, between accordion items). */
+.cta--two-col .cta__row {
+  gap: 2.08333vw; /* 40px @ 1920 */
+  margin: 0; /* resets .cta__row's inherited margin:0 -.78125vw (the old
+                card-grid negative-margin gutter trick, paired there with
+                compensating padding on .cta__col that this new
+                .cta__accordion-col doesn't have) - left uncorrected, it
+                shifts the whole row ~11px left of .cta__head h2, which
+                has no such margin, misaligning the title from the
+                content below it. */
+}
+
+@media (max-width: 1279px) {
+  .cta--two-col .cta__row {
+    gap: 40px;
+    margin: 0; /* resets site.css's own mobile margin:0 -15px for the same reason as above */
+  }
+}
+
+.cta--two-col .cta__accordion-col {
+  flex: 1 0 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2.08333vw; /* 40px @ 1920 */
+}
+
+@media (max-width: 1279px) {
+  .cta--two-col .cta__accordion-col {
+    gap: 40px;
+  }
+}
+
+@media (max-width: 767px) {
+  .cta--two-col .cta__row {
+    flex-wrap: wrap;
+  }
+  .cta--two-col .cta__accordion-col {
+    flex: 1 1 100%;
+  }
+}
+
+/* Column sub-heading ("Ticket Prices & Tour times" / "Getting Here" /
+   "See more about our Membership Options") reuses the real
+   .cta__sub-head h5 (SourceSerifPro-SemiBold -> Nunito Sans, 32px,
+   white) - already sets color:#fff itself, so no color override needed.
+
+   margin-bottom DOES need resetting: this file has a bare
+   `h5 { margin-bottom: 60px !important; }` (added for testimonial
+   attribution spacing elsewhere) that applies to .cta__sub-head h5 too -
+   needs its own !important to win against that one. Scoped to
+   .cta--accordion so it applies uniformly to every instance. */
+.cta--accordion h5 {
+  margin-bottom: 0 !important;
+}
+
+/* Membership has no .cta__accordion-col flex-gap between its subhead and
+   the tier columns (unlike Admission, where .cta__accordion-col's own
+   40px gap already provides this) - added explicitly here so both
+   variants use the identical 40px heading-to-content spacing. */
+.cta.membership .cta__sub-head {
+  margin-bottom: 2.08333vw; /* 40px @ 1920 */
+}
+
+@media (max-width: 1279px) {
+  .cta.membership .cta__sub-head {
+    margin-bottom: 40px;
+  }
+}
+
+/* Bottom disclaimer note (Medieval Mile Trail booking advice - only
+   present on pages whose accordion includes that tour). */
+.cta.admission .cta__note {
+  background-color: rgba(23, 23, 23, .12);
+  padding: 2.08333vw; /* 40px @ 1920 */
+  margin-top: auto;
+}
+
+@media (max-width: 1279px) {
+  .cta.admission .cta__note {
+    padding: 40px;
+  }
+}
+
+.cta.admission .cta__note p {
+  margin: 0;
+  padding: 0;
+  font-family: Montserrat-Medium;
+  font-weight: 400;
+  font-size: 18px; /* fixed baseline up to 1920 - see .acc__time above for why */
+  line-height: 1.5;
+  color: #fff;
+  word-break: break-word;
+}
+
+@media (min-width: 1920px) {
+  .cta.admission .cta__note p {
+    font-size: .9375vw; /* scales up only past 1920, for ultra-wide screens */
+  }
+}
+
+.cta.admission .cta__note a {
+  color: #fff;
+  text-decoration: underline;
+}
+
+/* "Getting Here" column stretches to match the pricing column's height,
+   with its accordion box at the top and the note (where present) pinned
+   to the bottom. */
+.cta.admission .cta__accordion-col--getting-here {
+  justify-content: flex-start;
+}
+
+.cta.admission .cta__accordion-col--getting-here .acc__box {
+  margin-bottom: 0;
+}
