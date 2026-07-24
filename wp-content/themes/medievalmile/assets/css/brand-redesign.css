@@ -524,57 +524,10 @@ body .nl__right .gform_wrapper form .gform_footer input:hover {
    Sizing is vw-based (not fixed px), matching every other fluid dimension
    in site.css, all of which resolve cleanly against a 1920px design
    baseline (e.g. .quote_box__inner's 51.04167vw === 980px at 1920px - the
-   same 980px used in its own sub-1280px fixed override). Pig.svg is sized
-   to 670.824x327.027 and Wolf.svg to 677.6x556.6 at that 1920px baseline:
-     670.824/1920 = 34.93875vw   327.027/1920 = 17.03264vw
-     677.6/1920 = 35.29167vw     556.6/1920 = 28.98958vw
-   Using vw for both dimensions (rather than vw+vh or a fixed aspect-ratio)
-   keeps each image scaling proportionally at any viewport width, matching
-   how site.css itself scales things - width and height move together
-   automatically since both are the same unit.
-   site.css's own responsive rule for the old single-shape design pulls
-   .quote_box__shape to the bottom edge below 1279px (originally so the one
-   shape wouldn't overlap the heading on shorter mobile layouts) - that would
-   incorrectly drag the top-right shape down too, so it's pinned back to the
-   top corner here at the same breakpoint. The bottom-left shape already
-   belongs at the bottom, so site.css's own rule is left alone for it. */
-.quote_box__shape--top-right,
-.quote_box__shape--bottom-left {
-  mix-blend-mode: normal;
-}
-
-.quote_box__shape--top-right {
-  top: 1px;
-  right: -1px;
-  bottom: auto;
-  left: auto;
-  width: 34.93875vw;
-  height: 17.03264vw;
-  object-position: right top;
-}
-
-.quote_box__shape--bottom-left {
-  top: auto;
-  right: auto;
-  bottom: 1px;
-  left: -1px;
-  width: 35.29167vw;
-  height: 28.98958vw;
-  object-position: left bottom;
-}
-
-@media (max-width: 1279px) {
-  .quote_box__shape--top-right {
-    top: 1px;
-    bottom: auto;
-  }
-}
-
-/* Homepage testimonial only: Pig/Wolf swapped to the opposite diagonal
-   (Pig top-left, Wolf bottom-right) per request - same sizing/logic as
-   --top-right/--bottom-left above, just mirrored horizontally. New
-   modifier classes rather than renaming the existing ones, so the other
-   23 quote_box instances site-wide keep their original corners. */
+   same 980px used in its own sub-1280px fixed override). Pig top-left and
+   Wolf bottom-right, used by every quote_box instance site-wide (the
+   opposite corners, --top-right/--bottom-left, were an earlier iteration
+   before all instances were unified onto this diagonal - removed, unused). */
 .quote_box__shape--top-left,
 .quote_box__shape--bottom-right {
   mix-blend-mode: normal;
@@ -1373,8 +1326,7 @@ body .nl__right .gform_wrapper form .gform_footer input:hover {
   background-color: #000000 !important;
 }
 
-#onetrust-consent-sdk #onetrust-pc-btn-handler,
-#onetrust-consent-sdk #onetrust-pc-btn-handler.cookie-setting-link {
+#onetrust-consent-sdk #onetrust-pc-btn-handler {
   color: #000000 !important;
   border-color: #ffffff !important;
   background-color: #ffffff !important;
