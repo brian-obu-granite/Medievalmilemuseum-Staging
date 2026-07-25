@@ -1,6 +1,10 @@
 // Smooth-scrolls the "Contact Us"/"Get in Touch" CTAs on this page down to
 // the on-page contact form section (#two_column_content_2) instead of
-// navigating to it.
+// navigating to it. Jumps straight there with no animation at all for
+// visitors with prefers-reduced-motion: reduce set (see the bottom of this
+// file) - WCAG 2.3.3, and simply the considerate thing to do for anyone
+// who's told their OS they get motion-sick from exactly this kind of
+// large, fast scroll.
 //
 // The CTAs deliberately do NOT use a real "#two_column_content_2" href
 // (a data-scroll-target attribute carries the id instead) - every attempt
@@ -63,12 +67,24 @@
     requestAnimationFrame(step);
   }
 
+  // WCAG 2.3.3 (Animation from Interactions): users with vestibular
+  // disorders or motion sensitivity can turn this off at the OS level:
+  // respect that instead of forcing the animation on everyone regardless
+  // of what they've asked their device to do.
+  function prefersReducedMotion() {
+    return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
+
   document.addEventListener('click', function (e) {
     var link = e.target.closest('a[data-scroll-target]');
     if (!link) { return; }
     var target = document.getElementById(link.getAttribute('data-scroll-target'));
     if (!target) { return; }
     e.preventDefault();
+    if (prefersReducedMotion()) {
+      window.scrollTo({ top: getTargetScrollY(target), left: 0, behavior: 'instant' });
+      return;
+    }
     animateScrollTo(target);
   }, true);
 })();
