@@ -113,6 +113,96 @@ h6 {
   letter-spacing: -0.02em;
 }
 
+/* Smooth-scroll for same-page anchor links (e.g. the Weddings/Events
+   "Contact Us" CTAs that jump down to the on-page contact form instead of
+   navigating to the separate Contact page) - no smooth-scroll JS library
+   exists anywhere in this codebase already, so plain scroll-behavior
+   covers it without introducing one. Global on <html> since there's
+   nothing anchor-scroll-specific here that would conflict with any other
+   #anchor link site-wide. */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Both the Weddings and Events pages' on-page contact form section reuses
+   this same page-builder-generated id (also present, coincidentally, on
+   the Contact page itself, which has the identical component) - offsets
+   the scroll target down by the fixed header's own height (~139px
+   measured), so the section's heading/form isn't left tucked underneath
+   it after the smooth-scroll lands. */
+#two_column_content_2 {
+  scroll-margin-top: 150px;
+}
+
+/* ==========================================================================
+   Shared fluid type-scale tokens.
+   Root cause of the site-wide "headings match at 1920px but diverge at
+   every other width" bug class: every heading-tier element site-wide is
+   rendered by a component class (.ic__heading, .slider__copy__heading,
+   .cta__head h2, .cta__sub-head h5, .acc__title, etc.) rather than a bare
+   h1-h6 tag, and each of those ~20 component classes had its own
+   independently hand-tuned vw rate and freeze ladder - only the vw rate at
+   the 1920px baseline was ever coordinated, so anything below the freeze
+   point could (and did) drift arbitrarily far from its peers.
+   Every heading-tier selector below now reads from these same variables,
+   so a heading that's visually meant to be "h2-sized" scales identically
+   everywhere it appears, at every width - not just at one baseline.
+
+   Second, related bug found by comparing two adjacent viewport widths
+   (e.g. 1280px vs 1279px): every vw rate here was calibrated to look right
+   at the 1920px design baseline, but was left applying unbounded below
+   that too - at 1280px wide, 3.64583vw (the h2 rate) evaluates to only
+   ~47px, well UNDER the 65px "frozen" value one pixel narrower at 1279px.
+   Every tier had this same backwards jump (39-50% across h1-h6) right at
+   the old 1280px cutoff. Fixed by only letting each vw rate apply
+   >=1920px (its own true baseline) and holding flat at the tier's
+   1279-breakpoint value for the entire 992-1919px range instead - at
+   exactly 1920px the vw rate evaluates to the tier's full baseline size,
+   which is always >= the flat value, so the transition is smooth or
+   exactly continuous, never a jump.
+   Breakpoints match the site's existing 1279/991/767 convention (h6 also
+   keeps its own pre-existing extra 1199px step, since no bug ever came
+   from that one - left as-is, just tokenized). */
+:root {
+  --h1-size-1920: 4.94792vw; /* 95px */
+  --h1-size-1279: 88px;
+  --h1-size-991: 68px;
+  --h1-size-767: 54px;
+
+  --h2-size-1920: 3.64583vw; /* 70px */
+  --h2-size-1279: 65px;
+  --h2-size-991: 50px;
+  --h2-size-767: 40px;
+
+  --h3-size-1920: 2.8125vw; /* 54px */
+  --h3-size-1279: 50px;
+  --h3-size-991: 45px;
+  --h3-size-767: 40px;
+
+  --h4-size-1920: 2.29167vw; /* 44px */
+  --h4-size-1279: 44px;
+  --h4-size-991: 40px;
+  --h4-size-767: 36px;
+
+  --h5-size-1920: 1.66667vw; /* 32px */
+  --h5-size-1279: 30px;
+  --h5-size-991: 26px;
+  --h5-size-767: 24px;
+
+  --h6-size-1920: 1.40625vw; /* 27px */
+  --h6-size-1279: 26px;
+  --h6-size-1199: 24px;
+  --h6-size-991: 22px;
+  --h6-size-767: 20px;
+
+  /* Small uppercase "eyebrow" label tier (e.g. "EVENTS & EXHIBITIONS" card
+     labels, testimonial attribution) - not one of the numbered h1-h6 rungs,
+     but the exact same bug class, so it shares the same token treatment. */
+  --eyebrow-size-1920: 1.14583vw; /* 22px */
+  --eyebrow-size-1279: 20px;
+  --eyebrow-size-767: 18px;
+}
+
 /* ==========================================================================
    Heading scale consolidation - one size per heading level at the 1920px
    baseline:
@@ -130,55 +220,202 @@ h6 {
    sized by its own class). A bare tag selector keeps the intended
    hierarchy: any class rule still beats it.
 
-   Fluid values scoped to >=1280px so they don't override site.css's own
-   fixed-px breakpoint ladders on source order; where a rung's mobile
-   ladder needed to change too, it's set explicitly below.
-   h1's sub-1280 ladder is untouched - every h1 on the site is an
-   inner-page banner title, and .page-banner__copy h1's own fixed mobile
-   sizes (45px/40px) still win there at higher specificity. */
-@media (min-width: 1280px) {
-  h1 { font-size: 4.94792vw; }  /*  95px @1920 */
-  h3 { font-size: 2.8125vw; }   /*  54px */
-  h4 { font-size: 2.29167vw; }  /*  44px */
-  h6 { font-size: 1.40625vw; }  /*  27px */
+   Every rung now carries an explicit 1279/991/767 freeze ladder of its
+   own - h1 and h2 previously had none here, silently falling through to
+   mismatched leftover values (see .page-banner__copy h1 and the h2-tier
+   component classes below, both fixed the same way). */
+@media (min-width: 1920px) {
+  h1 { font-size: var(--h1-size-1920); }
+  h2 { font-size: var(--h2-size-1920); }
+  h3 { font-size: var(--h3-size-1920); }
+  h4 { font-size: var(--h4-size-1920); }
+  h6 { font-size: var(--h6-size-1920); }
 }
 
-/* h3 rung mobile ladder: matches body .nl__heading (the rung's one
-   current member, which itself wins via its own higher-specificity rule -
-   this covers any future bare h3). */
-@media (max-width: 1279px) { h3 { font-size: 50px; } }
-@media (max-width: 991px)  { h3 { font-size: 45px; } }
-@media (max-width: 767px)  { h3 { font-size: 40px; } }
-
-/* h4 rung mobile ladder: carries over the old bare-h3 ladder (44/40/36),
-   so the body subheads retagged h3->h4 keep their exact previous sizes
-   at every breakpoint. */
-@media (max-width: 1279px) { h4 { font-size: 44px; } }
-@media (max-width: 991px)  { h4 { font-size: 40px; } }
-@media (max-width: 767px)  { h4 { font-size: 36px; } }
-
-/* h6 rung mobile ladder. */
-@media (max-width: 1279px) {
-  h6 { font-size: 26px; }
+@media (max-width: 1919px) {
+  h1 { font-size: var(--h1-size-1279); }
+  h2 { font-size: var(--h2-size-1279); }
+  h3 { font-size: var(--h3-size-1279); }
+  h4 { font-size: var(--h4-size-1279); }
 }
-@media (max-width: 1199px) {
-  h6 { font-size: 24px; }
+@media (max-width: 991px) {
+  h1 { font-size: var(--h1-size-991); }
+  h2 { font-size: var(--h2-size-991); }
+  h3 { font-size: var(--h3-size-991); }
+  h4 { font-size: var(--h4-size-991); }
 }
-@media (max-width: 991px)  {
-  h6 { font-size: 22px; }
-}
-@media (max-width: 767px)  {
-  h6 { font-size: 20px; }
+@media (max-width: 767px) {
+  h1 { font-size: var(--h1-size-767); }
+  h2 { font-size: var(--h2-size-767); }
+  h3 { font-size: var(--h3-size-767); }
+  h4 { font-size: var(--h4-size-767); }
 }
 
-/* Inner-page banner titles (h1, e.g. "Explore", "What's On"): site.css
-   sizes .page-banner__copy h1 at 3.64583vw (70px) at higher specificity
-   than the bare h1 rung above, so the 95px rung needs re-asserting here.
-   Scoped to >=1280px so site.css's own 45px/40px mobile values still
-   apply below. */
-@media (min-width: 1280px) {
-  .page-banner__copy h1 { font-size: 4.94792vw; }  /* 95px @1920 */
+/* h6 rung mobile ladder (its own extra 1199px step predates this change and
+   isn't shared by any other rung - kept as-is, just tokenized). */
+@media (max-width: 1919px) { h6 { font-size: var(--h6-size-1279); } }
+@media (max-width: 1199px) { h6 { font-size: var(--h6-size-1199); } }
+@media (max-width: 991px)  { h6 { font-size: var(--h6-size-991); } }
+@media (max-width: 767px)  { h6 { font-size: var(--h6-size-767); } }
+
+/* Homepage "Big Text" hero title (e.g. "800 Years of History") - its own
+   separate 120px tier, not part of the numbered h1-h6 rungs, but it had
+   the exact same >=1920px-calibrated-vw-rate-left-unbounded bug: 6.25vw
+   evaluates to 80px at 1280px wide, then crashes to a flat 45px one pixel
+   narrower at 1279px - a 44% single-step cliff, and simply capping the vw
+   rate to >=1920px (like every other tier above) would just relocate that
+   same cliff to the 1920px boundary instead (45px is only 37.5% of the
+   120px baseline, a much bigger gap than any h1-h6 tier has). Instead this
+   keeps both already-established endpoints - 120px desktop, 45px mobile -
+   and adds two new intermediate steps so the decline is gradual the whole
+   way down, the same shape as every other rung's ladder. */
+@media (min-width: 1920px) {
+  .hero__item__copy__heading { font-size: 6.25vw; }
 }
+@media (max-width: 1919px) {
+  .hero__item__copy__heading { font-size: 85px; }
+}
+@media (max-width: 991px) {
+  .hero__item__copy__heading { font-size: 60px; }
+}
+@media (max-width: 767px) {
+  .hero__item__copy__heading { font-size: 45px; }
+}
+
+/* Inner-page banner titles (h1, e.g. "Explore", "What's On" - the only
+   real-world h1 instance site-wide besides the homepage's separate "Big
+   Text" hero): site.css sizes .page-banner__copy h1 at higher specificity
+   than the bare h1 rung above, so it needs its own copy of every step -
+   including the freeze ladder site.css never gave it. It previously fell
+   back to a leftover 45px/40px 2-step tied to an old 70px baseline: a
+   disproportionate ~53% single-step crash right at the old 1280px
+   breakpoint, compared to every other title's much gentler decline. */
+@media (min-width: 1920px) {
+  .page-banner__copy h1 { font-size: var(--h1-size-1920); }
+}
+@media (max-width: 1919px) { .page-banner__copy h1 { font-size: var(--h1-size-1279); } }
+@media (max-width: 991px)  { .page-banner__copy h1 { font-size: var(--h1-size-991); } }
+@media (max-width: 767px)  { .page-banner__copy h1 { font-size: var(--h1-size-767); } }
+
+/* H2-tier component classes: all of these already rendered at the exact
+   same 70px size as bare h2 at the 1920px baseline (coincidentally, since each was
+   hand-tuned independently) but diverged hard below it -
+   .slider__copy__heading/.gallery__head__heading/.cg__head h2/.cta__head h2
+   were flat at a single 40px cliff with no gradual steps, and .ic__heading
+   had its own slightly-off 991px value (55px vs 50px). All five now share
+   the same gradual ladder as bare h2/.quote_box__heading (which already had
+   the right shape and didn't need changing). */
+@media (min-width: 1920px) {
+  .ic__heading,
+  .slider__copy__heading,
+  .gallery__head__heading,
+  .cg__head h2,
+  .cta__head h2 { font-size: var(--h2-size-1920); }
+}
+@media (max-width: 1919px) {
+  .ic__heading,
+  .slider__copy__heading,
+  .gallery__head__heading,
+  .cg__head h2,
+  .cta__head h2 { font-size: var(--h2-size-1279); }
+}
+@media (max-width: 991px) {
+  .ic__heading,
+  .slider__copy__heading,
+  .gallery__head__heading,
+  .cg__head h2,
+  .cta__head h2 { font-size: var(--h2-size-991); }
+}
+@media (max-width: 767px) {
+  .ic__heading,
+  .slider__copy__heading,
+  .gallery__head__heading,
+  .cg__head h2,
+  .cta__head h2 { font-size: var(--h2-size-767); }
+}
+
+/* .bic__copy__item .ic__heading (dark-overlay variant of the same "History
+   of the Building"-style heading, e.g. on the Explore page) has its own
+   higher-specificity site.css override that would otherwise beat the
+   simple .ic__heading rule above and keep it at a one-off 45px instead of
+   the shared h2-tier value. */
+@media (max-width: 991px) {
+  .bic__copy__item .ic__heading { font-size: var(--h2-size-991); }
+}
+@media (max-width: 767px) {
+  .bic__copy__item .ic__heading { font-size: var(--h2-size-767); }
+}
+
+/* H4-tier orphan: .lbs__item__card__heading ("Book Your Tickets"/"Book an
+   Event"/etc. cards) was still sized off the OLD pre-consolidation 38px h4
+   baseline (with an odd 46px blip at 1199px) - never updated when the h4
+   rung above moved to 44px. Now matches bare h4 exactly. */
+@media (min-width: 1920px) { .lbs__item__card__heading { font-size: var(--h4-size-1920); } }
+@media (max-width: 1919px) { .lbs__item__card__heading { font-size: var(--h4-size-1279); } }
+@media (max-width: 991px)  { .lbs__item__card__heading { font-size: var(--h4-size-991); } }
+@media (max-width: 767px)  { .lbs__item__card__heading { font-size: var(--h4-size-767); } }
+
+/* H5-tier component classes: the same shape of bug as H2 above - all match
+   the 32px bare-h5 baseline at 1920px (coincidentally), but each had its
+   own mismatched sub-1280 ladder (.acc__title's FAQ question text at 28/22/20,
+   .cg__card__heading flat at 32px, .cgw__card__heading/.cta__sub-head h5
+   flat at 24px). All four now share bare h5's own gradual 30/26/24 ladder. */
+@media (min-width: 1920px) {
+  .acc__title,
+  .cg__card__heading,
+  .cgw__card__heading,
+  .cta__sub-head h5 { font-size: var(--h5-size-1920); }
+}
+@media (max-width: 1919px) {
+  .acc__title,
+  .cg__card__heading,
+  .cgw__card__heading,
+  .cta__sub-head h5 { font-size: var(--h5-size-1279); }
+}
+@media (max-width: 991px) {
+  .acc__title,
+  .cg__card__heading,
+  .cgw__card__heading,
+  .cta__sub-head h5 { font-size: var(--h5-size-991); }
+}
+@media (max-width: 767px) {
+  .acc__title,
+  .cg__card__heading,
+  .cgw__card__heading,
+  .cta__sub-head h5 { font-size: var(--h5-size-767); }
+}
+
+/* Eyebrow/label tier (~22px @1920). .ic__sub-heading already had the
+   fuller 2-step ladder (20/18); the other four were flat at a single 18px
+   cliff. All five now share the fuller ladder. */
+@media (min-width: 1920px) {
+  .ic__sub-heading,
+  .slider__copy__sub_heading,
+  .quote_box__sub-heading,
+  .cg__head h5,
+  .gallery__head__sub-heading { font-size: var(--eyebrow-size-1920); }
+}
+@media (max-width: 1919px) {
+  .ic__sub-heading,
+  .slider__copy__sub_heading,
+  .quote_box__sub-heading,
+  .cg__head h5,
+  .gallery__head__sub-heading { font-size: var(--eyebrow-size-1279); }
+}
+@media (max-width: 767px) {
+  .ic__sub-heading,
+  .slider__copy__sub_heading,
+  .quote_box__sub-heading,
+  .cg__head h5,
+  .gallery__head__sub-heading { font-size: var(--eyebrow-size-767); }
+}
+
+/* body .nl__heading (the h3 rung's one other member) already matched the
+   h3 ladder exactly - tokenized here for consistency, values unchanged. */
+@media (min-width: 1920px) { body .nl__heading { font-size: var(--h3-size-1920); } }
+@media (max-width: 1919px) { body .nl__heading { font-size: var(--h3-size-1279); } }
+@media (max-width: 991px)  { body .nl__heading { font-size: var(--h3-size-991); } }
+@media (max-width: 767px)  { body .nl__heading { font-size: var(--h3-size-767); } }
 
 /* h3/h4/h5/h6 switch from Bartender (inherited from the generic .h1-.h6 rule
    above, same as every other heading level) to the real Macho Semibold.
@@ -772,9 +1009,13 @@ body .nl__right .gform_wrapper form .gform_footer input:hover {
    own box (left:50% + translateX(-50%)) rather than overlapping it -
    .quote_box's own 161px top padding (site.css, unchanged) comfortably
    fits the icon's height plus a gap above the heading, so nothing clips
-   against .quote_box's overflow:hidden. z-index stays -1 - harmless now
-   that it no longer overlaps text, kept for consistency with the desktop
-   rule above. */
+   against .quote_box's overflow:hidden.
+   z-index corrected to sit ABOVE .quote_box__bg here (unlike the desktop
+   rule above, which keeps z-index:-1 deliberately, tucking the icon behind
+   the headline as a subtle overlap): .quote_box__bg is itself
+   position:absolute covering the full component, so a -1 icon rendered
+   completely invisible behind it once repositioned off the text - it was
+   never actually visible on mobile despite otherwise-correct centering. */
 @media (max-width: 1279px) {
   .quote_box__heading:before {
     top: -85px;
@@ -782,6 +1023,7 @@ body .nl__right .gform_wrapper form .gform_footer input:hover {
     width: 90px;
     height: 73px;
     transform: translateX(-50%);
+    z-index: 2;
   }
 }
 
@@ -877,33 +1119,45 @@ body .nl__right .gform_wrapper form .gform_footer input:hover {
   justify-content: center;
 }
 
-/* Homepage testimonial (#quote_box_4) only: the shared .quote_box__heading:before
-   icon (used by the other 23 quote_box instances and the testimonials page's
-   full list) looks right but gets clipped here specifically - not by
-   .quote_box's own overflow:hidden (checked - plenty of buffer), but by
-   Slick's own .slick-list{overflow:hidden} (site.css/slick base styles),
-   which wraps this instance's slides since it's the one quote_box turned
-   into a carousel. Anything poking outside a slide via a heading-relative
-   negative offset gets clipped by that carousel viewport, which the other
-   instances never have to contend with.
+/* Every quote_box carousel instance (id="quote_box_4" is reused as-is on
+   every page's copy of this shared component - 24 instances, not just the
+   homepage, since the "unify testimonial component" pass made them all
+   identical) has the same problem: the shared .quote_box__heading:before
+   icon looks right on the dedicated testimonials page's plain list
+   (.quote_box__list - a set of plain .quote_box elements, never
+   slick-initialized, so nothing clips there), but gets clipped on every
+   carousel instance - not by .quote_box's own overflow:hidden (checked -
+   plenty of buffer), but by Slick's own .slick-list{overflow:hidden}
+   (site.css/slick base styles), which wraps every carousel instance's
+   slides. Anything poking outside a slide via a heading-relative negative
+   offset gets clipped by that carousel viewport - no z-index value can
+   escape a clipping ancestor, unlike a stacking-order problem, so this
+   needs a different element entirely rather than a z-index fix.
+   (This used to only disable the icon at >=1280px, on the assumption only
+   the homepage was ever a carousel and every other instance used the
+   plain-list path unclipped - both parts of that assumption turned out to
+   be wrong: every instance is a carousel now, and clipping happens at
+   every width, not just desktop, so the icon was invisible on mobile too
+   despite otherwise-correct centering.)
 
-   Fix: hide the shared heading-relative icon here and use a standalone
-   .quote_box__quote-icon element instead (HTML), a sibling of
-   .quote_box__slider inside .quote_box__slider-wrap - not a child of
-   .quote_box__slider itself, since slick.js treats every direct child of
-   the slider element as a slide and would break the carousel, and crucially
-   OUTSIDE the .slick-list Slick wraps around .quote_box__slider, so it's
-   never subject to that clip. Sized/positioned to match the shared
-   .quote_box__heading:before rule exactly (13.54167vw x 11.09375vw;
-   top:-5vw;left:-10vw) - here relative to .quote_box__slider-wrap instead
-   of the heading, since .quote_box__slider-wrap's own top-left corner
-   already tracks the heading's (the heading is the first content in
-   whichever slide is active), without the per-slide drift risk of
-   anchoring to the heading directly. */
-@media (min-width: 1280px) {
-  #quote_box_4 .quote_box__heading:before {
-    display: none;
-  }
+   Fix: hide the shared heading-relative icon on every carousel instance,
+   at every width, and use a standalone .quote_box__quote-icon element
+   instead (HTML), a sibling of .quote_box__slider inside
+   .quote_box__slider-wrap - not a child of .quote_box__slider itself,
+   since slick.js treats every direct child of the slider element as a
+   slide and would break the carousel, and crucially OUTSIDE the
+   .slick-list Slick wraps around .quote_box__slider, so it's never
+   subject to that clip. Sized/positioned to match the shared
+   .quote_box__heading:before rule exactly at both the desktop offset
+   (13.54167vw x 11.09375vw; top:-5vw;left:-10vw) and the mobile,
+   centered-above-title offset (90px x 73px; top:-85px;left:50%;
+   translateX(-50%)) - here relative to .quote_box__slider-wrap instead of
+   the heading, since .quote_box__slider-wrap's own top-left corner already
+   tracks the heading's (the heading is the first content in whichever
+   slide is active), without the per-slide drift risk of anchoring to the
+   heading directly. */
+#quote_box_4 .quote_box__heading:before {
+  display: none;
 }
 
 .quote_box__slider-wrap {
@@ -911,21 +1165,39 @@ body .nl__right .gform_wrapper form .gform_footer input:hover {
 }
 
 .quote_box__quote-icon {
-  display: none;
+  display: block;
+  position: absolute;
+  top: -85px;
+  left: 50%;
+  width: 90px;
+  height: 73px;
+  transform: translateX(-50%);
+  background-image: url(../../dist/images/icon-quote.svg);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  z-index: -1; /* behind the heading text (matches the desktop treatment
+                  and the plain-list page's .quote_box__heading:before,
+                  both z-index:-1) rather than in front of it - a positive
+                  z-index here was covering the title's own text on mobile,
+                  where the icon sits directly above/overlapping it (unlike
+                  desktop's offset placement). Still renders above
+                  .quote_box__bg despite being negative: .quote_box__inner
+                  (this element's ancestor) has its own z-index:3, which
+                  elevates its entire subtree - including any negative
+                  z-index descendants inside it - above .quote_box__bg's
+                  z-index:0 as a group; the negative value here only
+                  affects ordering relative to other content inside that
+                  same subtree (i.e. the heading text). */
 }
 
 @media (min-width: 1280px) {
   .quote_box__quote-icon {
-    display: block;
-    position: absolute;
     top: -5vw;
     left: -10vw;
     width: 13.54167vw;
     height: 11.09375vw;
-    background-image: url(../../dist/images/icon-quote.svg);
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: contain;
+    transform: none;
   }
 }
 
@@ -974,7 +1246,16 @@ body .nl__right .gform_wrapper form .gform_footer input:hover {
 
 @media (max-width: 1279px) {
   .quote_box__controls-arrow {
-    position: static;
+    /* position:relative, NOT static: .quote_box__bg and the Pig/Wolf shape
+       images stay position:absolute at every breakpoint, and an absolutely
+       positioned sibling always paints above plain static content
+       regardless of z-index (z-index only takes effect on a positioned
+       element) - a static .quote_box__controls-arrow was being completely
+       hidden behind .quote_box__bg here, even though it still had valid
+       layout dimensions. relative keeps this in normal document flow
+       (same layout behavior as static) while re-enabling the z-index:10
+       already set above, so it renders above the background again. */
+    position: relative;
     transform: none;
     width: auto;
     flex-direction: row;
@@ -1049,7 +1330,11 @@ body .nl__right .gform_wrapper form .gform_footer input:hover {
 
 @media (max-width: 1279px) {
   .quote_box__controls-dots {
-    position: static;
+    /* relative, not static - same reason as .quote_box__controls-arrow
+       above: static would lose the z-index:10 set on the base rule and
+       get hidden behind .quote_box__bg/the Pig/Wolf shapes, which stay
+       position:absolute at every breakpoint. */
+    position: relative;
     transform: none;
     width: auto;
     margin-top: 15px;
@@ -1221,7 +1506,6 @@ body .nl__right .gform_wrapper form .gform_footer input:hover {
 
 .hero__item__copy__description h5,
 .page-banner__copy__description p {
-  font-size: 1.66667vw;
   color: #fff;
   text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
   font-family: Macho-Semibold;
@@ -1229,24 +1513,34 @@ body .nl__right .gform_wrapper form .gform_footer input:hover {
   line-height: 1.25;
 }
 
-@media (max-width: 1279px) {
+/* font-size scoped to >=1920px, flat below - see the "Shared fluid
+   type-scale tokens" note above for why the vw rate can't apply unbounded
+   below its own 1920px baseline without creating a backwards jump. */
+@media (min-width: 1920px) {
   .hero__item__copy__description h5,
   .page-banner__copy__description p {
-    font-size: 30px;
+    font-size: var(--h5-size-1920);
+  }
+}
+
+@media (max-width: 1919px) {
+  .hero__item__copy__description h5,
+  .page-banner__copy__description p {
+    font-size: var(--h5-size-1279);
   }
 }
 
 @media (max-width: 991px) {
   .hero__item__copy__description h5,
   .page-banner__copy__description p {
-    font-size: 26px;
+    font-size: var(--h5-size-991);
   }
 }
 
 @media (max-width: 767px) {
   .hero__item__copy__description h5,
   .page-banner__copy__description p {
-    font-size: 24px;
+    font-size: var(--h5-size-767);
     color: #161412 !important;
     text-shadow: none !important;
   }
@@ -2204,6 +2498,15 @@ body.page-id-753 #two_column_content_2 .page-content {
 .cta--accordion .acc__panel__copy p strong {
   font-family: Montserrat-SemiBold; /* Baloo 2 SemiBold */
   font-weight: 400;
+}
+
+/* Inline links (Getting Here directions copy: train station, bus
+   operators, route planner) - same white-underlined treatment already
+   established for .cta__note a, so a link inside the white panel copy
+   reads the same way as one inside the note below it. */
+.cta--accordion .acc__panel__copy a {
+  color: #fff;
+  text-decoration: underline;
 }
 
 /* Benefit lists (e.g. membership tiers with multiple perks): a real

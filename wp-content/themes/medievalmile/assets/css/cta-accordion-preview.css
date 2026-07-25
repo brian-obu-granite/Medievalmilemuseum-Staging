@@ -232,6 +232,15 @@
   font-weight: 400;
 }
 
+/* Inline links (Getting Here directions copy: train station, bus
+   operators, route planner) - same white-underlined treatment already
+   established for .cta__note a, so a link inside the white panel copy
+   reads the same way as one inside the note below it. */
+.cta--accordion .acc__panel__copy a {
+  color: #fff;
+  text-decoration: underline;
+}
+
 /* Benefit lists (e.g. membership tiers with multiple perks): a real
    bulleted list instead of <br>-separated lines in one paragraph, so a
    long item wrapping onto a second line (e.g. "...for one year") can't
