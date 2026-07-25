@@ -623,6 +623,17 @@ h5 {
   background-color: #781041;
 }
 
+/* .cg__card__copy.green (explore/whats-on/index.html, 6 instances - the
+   only page using this variant) shows the opposite problem from the
+   navy/wine fix above: its .card-shape SVG reads as a clearly visible
+   dark mark in the card's bottom-right corner against the near-black
+   #161412 copybg, rather than blending away. Removed outright here
+   instead of retuning opacity/blend, since the shape isn't wanted on
+   this variant at all. */
+.cg__card__copy.green .card-shape {
+  display: none;
+}
+
 /* .cgw__card__copy (the "About the Museum" / "Getting Here" cards further
    down the same Plan Your Visit page) renamed .blue -> .navy the same
    way as .cg__card__copy above: .blue resolves to site.css's light gold
