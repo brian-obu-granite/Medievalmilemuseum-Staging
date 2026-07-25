@@ -201,6 +201,17 @@ html {
   --eyebrow-size-1920: 1.14583vw; /* 22px */
   --eyebrow-size-1279: 20px;
   --eyebrow-size-767: 18px;
+
+  /* Card-title tier (38px @1920): the "Explore the Museum" carousel's own
+     card titles (.slider__slide-heading, e.g. "Guided Museum Tour") and
+     the "Book Your Tickets"/"Book an Event"/"Annual Membership" cards
+     (.lbs__item__card__heading) - deliberately kept separate from the
+     numbered h4 rung (44px) since these two card components are meant to
+     match EACH OTHER's size, not the h4 rung. Only one freeze step,
+     matching .slider__slide-heading's own original (pre-fix) ladder - it
+     never had a further 991/767 step to begin with. */
+  --card-title-size-1920: 1.97917vw; /* 38px */
+  --card-title-size-1279: 32px;
 }
 
 /* ==========================================================================
@@ -346,14 +357,34 @@ html {
   .bic__copy__item .ic__heading { font-size: var(--h2-size-767); }
 }
 
-/* H4-tier orphan: .lbs__item__card__heading ("Book Your Tickets"/"Book an
-   Event"/etc. cards) was still sized off the OLD pre-consolidation 38px h4
-   baseline (with an odd 46px blip at 1199px) - never updated when the h4
-   rung above moved to 44px. Now matches bare h4 exactly. */
-@media (min-width: 1920px) { .lbs__item__card__heading { font-size: var(--h4-size-1920); } }
-@media (max-width: 1919px) { .lbs__item__card__heading { font-size: var(--h4-size-1279); } }
-@media (max-width: 991px)  { .lbs__item__card__heading { font-size: var(--h4-size-991); } }
-@media (max-width: 767px)  { .lbs__item__card__heading { font-size: var(--h4-size-767); } }
+/* Card-title tier: .lbs__item__card__heading ("Book Your Tickets"/"Book an
+   Event"/etc. cards, 51 occurrences across 13 pages) and
+   .slider__slide-heading (the "Explore the Museum" carousel's own card
+   titles, e.g. "Guided Museum Tour") are meant to visually match each
+   other, not the numbered h4 rung - both share the 38px card-title tier
+   instead. (.lbs__item__card__heading previously had an odd 46px blip at
+   1199px on top of its own mismatched ladder - both gone now that it
+   shares this tier's tokens.)
+   Both also had the site-wide "vw rate left unbounded below 1920"
+   discontinuity: .slider__slide-heading's own original ladder was
+   1.97917vw (38px@1920) unconditionally, freezing to 32px only below
+   1279px - at 1280px wide that vw rate evaluates to just ~25px, so
+   crossing to 1279px caused a 26% backwards jump UP to 32px, the same bug
+   class fixed for h1-h6 earlier. Scoping the vw rate to >=1920px and
+   holding 32px flat for the entire 992-1919px range (as with every other
+   tier) removes that jump. */
+@media (min-width: 1920px) {
+  .lbs__item__card__heading,
+  .slider__slide-heading {
+    font-size: var(--card-title-size-1920);
+  }
+}
+@media (max-width: 1919px) {
+  .lbs__item__card__heading,
+  .slider__slide-heading {
+    font-size: var(--card-title-size-1279);
+  }
+}
 
 /* H5-tier component classes: the same shape of bug as H2 above - all match
    the 32px bare-h5 baseline at 1920px (coincidentally), but each had its
@@ -2533,13 +2564,20 @@ body.page-id-753 #two_column_content_2 .page-content {
   margin: 0;
 }
 
-/* CTA button (e.g. "Book Now"): reuses the site's existing .btn (same
-   padding/size/typeface as every other button), with a new colour
-   modifier pulling the exact "wine" (#781041) already established
-   elsewhere (.slider__slide-link.wine, .copybg.wine) rather than the
-   default .btn magenta (#9A1356) or a new one-off colour. */
-.cta--accordion .btn--wine {
+/* "wine" button colour modifier: reuses the site's existing .btn (same
+   padding/size/typeface as every other button), pulling the exact "wine"
+   (#781041) already established elsewhere (.slider__slide-link.wine,
+   .copybg.wine) rather than the default .btn magenta (#9A1356) or a new
+   one-off colour. General/unscoped, matching the same convention as the
+   theme's own .btn--yellow (site.css) - reusable on any .btn anywhere,
+   not just inside the accordion. */
+.btn--wine {
   background-color: #781041;
+}
+
+/* Accordion-specific: additionally resets the flex margin/alignment
+   inherited from .acc__panel__copy's flex-column layout. */
+.cta--accordion .btn--wine {
   margin: 0;
   align-self: flex-start;
 }
