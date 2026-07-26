@@ -2593,6 +2593,20 @@ body.page-id-753 #two_column_content_2 .page-content {
   align-self: flex-start;
 }
 
+/* Overrides the underline that .cta--accordion .acc__panel__copy a
+   (above) applies to inline text links in this same panel - that rule
+   is meant for plain copy links (Getting Here directions: train
+   station, bus operators), not this Book Now/What's On button, which is
+   also an <a> and so inherits it by accident. Needs the extra `a` in
+   the selector (matching .acc__panel__copy a's own specificity plus
+   .btn--wine) since .cta--accordion .btn--wine alone is one class short
+   of beating that rule's specificity. No other .btn--wine instance sits
+   inside .acc__panel__copy, so this only affects the accordion's own
+   buttons. */
+.cta--accordion .acc__panel__copy a.btn--wine {
+  text-decoration: none;
+}
+
 /* ==========================================================================
    SHARED: two-column split (used by .cta.admission and .cta.membership)
    ========================================================================== */
