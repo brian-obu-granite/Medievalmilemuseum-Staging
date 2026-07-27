@@ -2742,15 +2742,23 @@ body.page-id-753 #two_column_content_2 .page-content {
    grid/item selector via data attributes (see content-filter.js), and
    lists whichever tabs that page needs in its own markup, so this CSS and
    the filtering logic itself are never duplicated per page. */
+/* vw rate scoped to >=1920px, frozen value held flat for the entire
+   <1920px range below it (rather than only <=1279px) - the same fix
+   already applied to h1-h6/card-title elsewhere in this file. The old
+   unconditional-vw + single-1279px-freeze pattern left the vw rate
+   active down to 1280px, where it evaluates to LESS than the frozen
+   value just below it at 1279px (54px vs 64.8px top padding) - a
+   ~20% backwards jump UP in padding when narrowing past that
+   boundary, the same bug class already fixed for other components. */
 .content-filter__sec {
-  padding-top: 4.21875vw; /* 81px @1920 (67.5px + 20%, third round: 30 -> 45 -> 67.5 -> 81) */
-  padding-bottom: 4.21875vw;
+  padding-top: 81px; /* 67.5px + 20%, third round: 30 -> 45 -> 67.5 -> 81 */
+  padding-bottom: 51.6375px; /* 81px - 25%, then - 15%: 81 -> 60.75 -> 51.6375 */
 }
 
-@media (max-width: 1279px) {
+@media (min-width: 1920px) {
   .content-filter__sec {
-    padding-top: 64.8px; /* 54px + 20% */
-    padding-bottom: 64.8px;
+    padding-top: 4.21875vw; /* 81px @1920 */
+    padding-bottom: 2.689453125vw; /* 51.6375px @1920 */
   }
 }
 
