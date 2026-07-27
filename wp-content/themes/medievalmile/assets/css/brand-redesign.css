@@ -2734,3 +2734,261 @@ body.page-id-753 #two_column_content_2 .page-content {
 .cta.admission .cta__accordion-col--getting-here .acc__box {
   margin-bottom: 0;
 }
+
+/* ==========================================================================
+   Content filter bar (What's On / Blog): category tabs + "Filter by Month"
+   dropdown, sitting between the page hero and the card grid. One shared
+   component - each page's .content-filter root just points at a different
+   grid/item selector via data attributes (see content-filter.js), and
+   lists whichever tabs that page needs in its own markup, so this CSS and
+   the filtering logic itself are never duplicated per page. */
+.content-filter__sec {
+  padding-top: 4.21875vw; /* 81px @1920 (67.5px + 20%, third round: 30 -> 45 -> 67.5 -> 81) */
+  padding-bottom: 4.21875vw;
+}
+
+@media (max-width: 1279px) {
+  .content-filter__sec {
+    padding-top: 64.8px; /* 54px + 20% */
+    padding-bottom: 64.8px;
+  }
+}
+
+/* Card grid immediately below the filter bar on What's On/Blog: removes
+   the section's own top padding entirely (bottom untouched) now that
+   the filter bar above already adds its own vertical spacing - full
+   .module padding on both would double up the gap between the bar and
+   the cards. One rule covers every breakpoint since 0 doesn't need a
+   separate vw/px value per .module's own 1920/1279/767 steps.
+   Scoped by each page's WordPress page-id body class (1338 = What's On,
+   458 = Blog) - NOT by the wrapping div's own #id
+   (#links_card_with_image_4_column_2), which turned out to be a
+   per-page auto-numbered instance id that Plan Your Visit's own
+   .cg__sec wrapper also happens to share, so that selector was
+   incorrectly stripping its top padding too. page-id-* is WordPress's
+   actual post ID and is guaranteed unique site-wide. .cg__sec is also
+   reused on Plan Your Visit/Admission & Opening Hours, which don't sit
+   under this filter bar and must keep their normal top padding. */
+.page-id-1338 .cg__sec,
+.page-id-458 .ln {
+  padding-top: 0;
+}
+
+.content-filter {
+  display: flex;
+  align-items: flex-end; /* bottom-aligns the tabs and the (taller) month
+    pill onto a shared baseline, so the divider below - tied to this
+    container's own bottom edge - lines up with both, rather than
+    needing to reverse-engineer where "center" alignment happens to
+    leave the tabs' own bottom edge relative to the row */
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1.5625vw; /* 30px @1920 */
+  position: relative;
+  padding-bottom: 0.625vw; /* 12px @1920 - gap between the tab labels and the divider line below */
+}
+
+/* Full-width divider spanning the entire filter row (tabs through to
+   the month dropdown), at 50% opacity so it reads as a subtle row
+   separator rather than a heavy rule - the active tab's own solid
+   5px accent (below) is what's meant to stand out, layered on top of
+   this line at the same vertical position. */
+.content-filter::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background-color: #D8D5CC; /* matches .content-filter__month-select's own border color */
+}
+
+.content-filter__tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2.08333vw; /* 40px @1920 */
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.content-filter__tab {
+  background: none;
+  border: none;
+  margin: 0;
+  padding: 0;
+  font-family: Montserrat-Medium; /* matches .content-filter__month-select's own font - was
+    swapping to Montserrat-SemiBold for the active state below, which
+    both mismatched the month dropdown and duplicated the bold-text
+    treatment now done via font-weight instead */
+  font-size: 1.04167vw; /* 20px @1920 */
+  font-weight: 400;
+  text-transform: none; /* overrides style.css's global button{text-transform:uppercase}
+    reset - .content-filter__tab is a plain <button>, so it inherits that
+    rule by default same as every other <button> on the site */
+  color: #6D6D6D;
+  cursor: pointer;
+  position: relative;
+  line-height: 1.2;
+}
+
+/* style.css's base button reset includes a global
+   `button:focus, button:hover { text-decoration: underline; }` (among
+   many other selectors sharing that same rule) - since a plain
+   <button> click also gives it browser focus (not just :hover), the
+   clicked/active tab kept showing that underline via :focus even
+   after the :hover override below was added. Both states need
+   overriding here, not just :hover. */
+.content-filter__tab:hover,
+.content-filter__tab:focus {
+  color: #161412;
+  text-decoration: none;
+}
+
+.content-filter__tab.is-active {
+  color: #161412;
+  font-weight: 700; /* no dedicated bold face is registered for
+    Montserrat-Medium (see @font-face above - one file, weight:400), so
+    this renders as the browser's synthetic/faux bold - the same
+    approach already relied on nowhere else, but standard behavior in
+    every current browser when only one weight is registered. */
+}
+
+/* The active tab's own accent: solid, full-opacity, 5px tall, exactly
+   as wide as this tab specifically (not the whole row) - layered on
+   top of .content-filter's full-width 50%-opacity divider by sitting
+   at the same vertical position (bottom:-0.625vw here matches the
+   container's own padding-bottom above, since this pseudo's
+   containing block is the tab itself, whose bottom edge sits one
+   padding-bottom above the container's, thanks to align-items:flex-end
+   pinning it to the inner edge of that padding). Moves and resizes
+   automatically with the .is-active class toggle in content-filter.js -
+   no JS position/width calculation needed since it's sized purely by
+   the tab's own box. */
+.content-filter__tab.is-active::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -0.625vw; /* 12px @1920, matches .content-filter's padding-bottom */
+  height: 5px;
+  background-color: #161412;
+}
+
+.content-filter__month-select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-color: #fff;
+  border: 1px solid #D8D5CC;
+  border-radius: 0;
+  margin: 0;
+  padding: 0.625vw 2.60417vw 0.625vw 1.5625vw; /* 12px 50px 12px 30px @1920 */
+  font-family: Montserrat-Medium;
+  font-size: 0.9375vw; /* 18px @1920 */
+  color: #161412;
+  cursor: pointer;
+  /* Inline chevron avoids a new asset file for a single-use icon reused
+     at two sizes/colours nowhere else on the site. */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6' fill='none'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%23161412' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1.04167vw center; /* 20px @1920 */
+  background-size: 0.52083vw; /* 10px @1920 */
+}
+
+.content-filter__month-select:hover {
+  border-color: #161412;
+}
+
+@media (max-width: 1279px) {
+  .content-filter {
+    gap: 24px;
+    padding-bottom: 10px;
+  }
+
+  .content-filter__tabs {
+    gap: 24px;
+  }
+
+  .content-filter__tab {
+    font-size: 18px;
+  }
+
+  .content-filter__tab.is-active::after {
+    bottom: -10px; /* matches .content-filter's padding-bottom at this breakpoint */
+  }
+
+  .content-filter__month-select {
+    padding: 10px 40px 10px 20px;
+    font-size: 16px;
+    background-position: right 16px center;
+    background-size: 10px;
+  }
+}
+
+/* Tabs scroll horizontally rather than wrap onto multiple lines at
+   mobile widths - matches the site's existing horizontal-scroll
+   carousel/controls convention elsewhere, and keeps the active
+   underline's row from reflowing awkwardly with 4 tabs of very
+   different lengths (e.g. "All" vs "Featured Events (New)"). */
+@media (max-width: 767px) {
+  .content-filter {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+    padding-bottom: 0;
+  }
+
+  /* Tabs and the month dropdown stack into separate rows here instead
+     of sharing one baseline, so .content-filter's own full-width
+     divider (which would otherwise land below the WHOLE stacked
+     column, under the month dropdown too) is turned off in favour of
+     an equivalent divider scoped to .content-filter__tabs alone -
+     still full-width, just specifically under the tabs row. */
+  .content-filter::after {
+    content: none;
+  }
+
+  /* width:100% + min-width:0 override the flex default of sizing each
+     column child to its content's min-content width (572px of tab
+     labels) rather than the 345px column it's actually in - without
+     both, overflow-x:auto below never gets a chance to scroll, since
+     the element itself just overflows the page instead. */
+  .content-filter__tabs,
+  .content-filter__month {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .content-filter__tabs {
+    flex-wrap: nowrap;
+    gap: 20px;
+    overflow-x: auto;
+    padding-bottom: 16px;
+    -webkit-overflow-scrolling: touch;
+    position: relative;
+  }
+
+  .content-filter__tabs::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 1px;
+    background-color: #D8D5CC;
+  }
+
+  .content-filter__tab {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+
+  .content-filter__tab.is-active::after {
+    bottom: -16px; /* matches .content-filter__tabs's own padding-bottom here, now that the divider lives on it instead of .content-filter */
+  }
+
+  .content-filter__month-select {
+    width: 100%;
+  }
+}
