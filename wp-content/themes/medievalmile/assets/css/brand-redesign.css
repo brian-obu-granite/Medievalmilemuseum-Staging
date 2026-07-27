@@ -2908,6 +2908,15 @@ body.page-id-753 #two_column_content_2 .page-content {
   border-color: #161412;
 }
 
+/* Replaces the browser default (blue) focus ring with white, rather
+   than the off-brand blue outline browsers apply to <select> by
+   default. */
+.content-filter__month-select:focus,
+.content-filter__month-select:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
 @media (max-width: 1279px) {
   .content-filter {
     gap: 24px;
