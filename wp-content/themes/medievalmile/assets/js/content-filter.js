@@ -35,7 +35,14 @@
 		if (!grid) { return; }
 		var itemSelector = root.getAttribute('data-filter-item');
 		var tabs = Array.prototype.slice.call(root.querySelectorAll('[data-filter-tab]'));
-		var monthSelect = root.querySelector('.content-filter__month-select');
+		var categorySelect = root.querySelector('.content-filter__category-select');
+		// Scoped to .content-filter__month specifically (not just
+		// .content-filter__month-select) - the mobile category dropdown
+		// above also carries the .content-filter__month-select class for
+		// identical pill/border/chevron styling, so an unscoped query here
+		// would match it first and populate month options into the wrong
+		// <select>.
+		var monthSelect = root.querySelector('.content-filter__month .content-filter__month-select');
 		var today = startOfToday();
 
 		var items = Array.prototype.slice.call(grid.querySelectorAll(itemSelector)).map(function (el) {
@@ -101,18 +108,36 @@
 			});
 		}
 
+		// Shared by both the desktop tab row and the mobile category
+		// dropdown (only one of which is visible at a given width - see
+		// the >=767px/<=767px CSS), so picking a category in either one
+		// keeps the other in sync. That matters if the viewport is
+		// resized across that breakpoint after a selection, rather than
+		// only reloading fresh each time.
+		function setActiveTab(key) {
+			activeTab = key;
+			tabs.forEach(function (t) {
+				var isMatch = t.getAttribute('data-filter-tab') === key;
+				t.classList.toggle('is-active', isMatch);
+				t.setAttribute('aria-selected', isMatch ? 'true' : 'false');
+			});
+			if (categorySelect && categorySelect.value !== key) {
+				categorySelect.value = key;
+			}
+			render();
+		}
+
 		tabs.forEach(function (tab) {
 			tab.addEventListener('click', function () {
-				tabs.forEach(function (t) {
-					t.classList.remove('is-active');
-					t.setAttribute('aria-selected', 'false');
-				});
-				tab.classList.add('is-active');
-				tab.setAttribute('aria-selected', 'true');
-				activeTab = tab.getAttribute('data-filter-tab');
-				render();
+				setActiveTab(tab.getAttribute('data-filter-tab'));
 			});
 		});
+
+		if (categorySelect) {
+			categorySelect.addEventListener('change', function () {
+				setActiveTab(categorySelect.value);
+			});
+		}
 
 		if (monthSelect) {
 			monthSelect.addEventListener('change', function () {

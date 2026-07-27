@@ -2782,6 +2782,19 @@ body.page-id-753 #two_column_content_2 .page-content {
   padding-top: 0;
 }
 
+/* Fluid scaling, matching the site's established convention (h1-h6,
+   card-title, .content-filter__sec above): every vw rate in this
+   component is scoped to >=1920px, with the value it evaluates to AT
+   1920 held flat as the unconditional/mobile-first base for the whole
+   <1920px range. The previous version left several vw rates
+   unconditionally active down to 1280px, where they computed to LESS
+   than the single frozen value below at 1279px (e.g. .content-filter's
+   own gap: 20px at 1280 vs a frozen 24px at 1279) - a backwards jump UP
+   when narrowing past that boundary, the same bug class already fixed
+   for .content-filter__sec. Not every property actually had this bug
+   (.content-filter__tabs's own gap decreases correctly, no jump) but
+   all are restructured the same way here for one consistent pattern
+   rather than mixing two conventions in the same component. */
 .content-filter {
   display: flex;
   align-items: flex-end; /* bottom-aligns the tabs and the (taller) month
@@ -2791,9 +2804,16 @@ body.page-id-753 #two_column_content_2 .page-content {
     leave the tabs' own bottom edge relative to the row */
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 1.5625vw; /* 30px @1920 */
+  gap: 24px;
   position: relative;
-  padding-bottom: 0.625vw; /* 12px @1920 - gap between the tab labels and the divider line below */
+  padding-bottom: 10px; /* gap between the tab labels and the divider line below */
+}
+
+@media (min-width: 1920px) {
+  .content-filter {
+    gap: 1.5625vw; /* 30px @1920 */
+    padding-bottom: 0.625vw; /* 12px @1920 */
+  }
 }
 
 /* Full-width divider spanning the entire filter row (tabs through to
@@ -2811,13 +2831,30 @@ body.page-id-753 #two_column_content_2 .page-content {
   background-color: #D8D5CC; /* matches .content-filter__month-select's own border color */
 }
 
+/* Mobile-only category dropdown: hidden above 767px, where the tab row
+   (below) is used instead. Its <select> reuses .content-filter__month-select
+   directly (see markup) for identical pill/border/chevron/focus styling,
+   rather than duplicating those declarations for a second control. */
+.content-filter__category {
+  display: none;
+}
+
 .content-filter__tabs {
   display: flex;
   flex-wrap: wrap;
-  gap: 2.08333vw; /* 40px @1920 */
+  gap: 50px; /* flat below 1920px, then scales fluidly above via vw - same
+    1920-baseline convention as the rest of this component (only the
+    tab row itself, not the mobile category dropdown, which has no
+    gap between items since it's a single control). */
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+@media (min-width: 1920px) {
+  .content-filter__tabs {
+    gap: 2.60417vw; /* 50px @1920 */
+  }
 }
 
 .content-filter__tab {
@@ -2829,7 +2866,7 @@ body.page-id-753 #two_column_content_2 .page-content {
     swapping to Montserrat-SemiBold for the active state below, which
     both mismatched the month dropdown and duplicated the bold-text
     treatment now done via font-weight instead */
-  font-size: 1.04167vw; /* 20px @1920 */
+  font-size: 18px;
   font-weight: 400;
   text-transform: none; /* overrides style.css's global button{text-transform:uppercase}
     reset - .content-filter__tab is a plain <button>, so it inherits that
@@ -2838,6 +2875,12 @@ body.page-id-753 #two_column_content_2 .page-content {
   cursor: pointer;
   position: relative;
   line-height: 1.2;
+}
+
+@media (min-width: 1920px) {
+  .content-filter__tab {
+    font-size: 1.04167vw; /* 20px @1920 */
+  }
 }
 
 /* style.css's base button reset includes a global
@@ -2878,9 +2921,15 @@ body.page-id-753 #two_column_content_2 .page-content {
   position: absolute;
   left: 0;
   right: 0;
-  bottom: -0.625vw; /* 12px @1920, matches .content-filter's padding-bottom */
+  bottom: -10px; /* matches .content-filter's own padding-bottom */
   height: 5px;
   background-color: #161412;
+}
+
+@media (min-width: 1920px) {
+  .content-filter__tab.is-active::after {
+    bottom: -0.625vw; /* 12px @1920, matches .content-filter's padding-bottom */
+  }
 }
 
 .content-filter__month-select {
@@ -2891,17 +2940,26 @@ body.page-id-753 #two_column_content_2 .page-content {
   border: 1px solid #D8D5CC;
   border-radius: 0;
   margin: 0;
-  padding: 0.625vw 2.60417vw 0.625vw 1.5625vw; /* 12px 50px 12px 30px @1920 */
+  padding: 10px 40px 10px 20px;
   font-family: Montserrat-Medium;
-  font-size: 0.9375vw; /* 18px @1920 */
+  font-size: 16px;
   color: #161412;
   cursor: pointer;
   /* Inline chevron avoids a new asset file for a single-use icon reused
      at two sizes/colours nowhere else on the site. */
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6' fill='none'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%23161412' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: right 1.04167vw center; /* 20px @1920 */
-  background-size: 0.52083vw; /* 10px @1920 */
+  background-position: right 16px center;
+  background-size: 10px;
+}
+
+@media (min-width: 1920px) {
+  .content-filter__month-select {
+    padding: 0.625vw 2.60417vw 0.625vw 1.5625vw; /* 12px 50px 12px 30px @1920 */
+    font-size: 0.9375vw; /* 18px @1920 */
+    background-position: right 1.04167vw center; /* 20px @1920 */
+    background-size: 0.52083vw; /* 10px @1920 */
+  }
 }
 
 .content-filter__month-select:hover {
@@ -2917,37 +2975,17 @@ body.page-id-753 #two_column_content_2 .page-content {
   outline-offset: 2px;
 }
 
-@media (max-width: 1279px) {
-  .content-filter {
-    gap: 24px;
-    padding-bottom: 10px;
-  }
-
-  .content-filter__tabs {
-    gap: 24px;
-  }
-
-  .content-filter__tab {
-    font-size: 18px;
-  }
-
-  .content-filter__tab.is-active::after {
-    bottom: -10px; /* matches .content-filter's padding-bottom at this breakpoint */
-  }
-
-  .content-filter__month-select {
-    padding: 10px 40px 10px 20px;
-    font-size: 16px;
-    background-position: right 16px center;
-    background-size: 10px;
-  }
-}
-
 /* Tabs scroll horizontally rather than wrap onto multiple lines at
    mobile widths - matches the site's existing horizontal-scroll
    carousel/controls convention elsewhere, and keeps the active
    underline's row from reflowing awkwardly with 4 tabs of very
    different lengths (e.g. "All" vs "Featured Events (New)"). */
+/* Below 767px the tab row is replaced entirely by the category
+   dropdown above (rather than kept as a horizontally-scrolling row) -
+   the divider/accent-offset/scroll machinery the tab row needed is
+   moot once it's hidden, so this breakpoint only needs to flip
+   .content-filter__tabs/.content-filter__category's visibility and
+   stack both dropdowns full-width. */
 @media (max-width: 767px) {
   .content-filter {
     flex-direction: column;
@@ -2956,55 +2994,33 @@ body.page-id-753 #two_column_content_2 .page-content {
     padding-bottom: 0;
   }
 
-  /* Tabs and the month dropdown stack into separate rows here instead
-     of sharing one baseline, so .content-filter's own full-width
-     divider (which would otherwise land below the WHOLE stacked
-     column, under the month dropdown too) is turned off in favour of
-     an equivalent divider scoped to .content-filter__tabs alone -
-     still full-width, just specifically under the tabs row. */
+  /* .content-filter's own full-width divider was tab-row-specific
+     (paired with the tabs' active-accent line); with no tab row here,
+     there's nothing left for it to underline. */
   .content-filter::after {
     content: none;
   }
 
-  /* width:100% + min-width:0 override the flex default of sizing each
-     column child to its content's min-content width (572px of tab
-     labels) rather than the 345px column it's actually in - without
-     both, overflow-x:auto below never gets a chance to scroll, since
-     the element itself just overflows the page instead. */
-  .content-filter__tabs,
+  .content-filter__tabs {
+    display: none;
+  }
+
+  /* min-width:0 defends against the same flex-column sizing issue
+     documented on .content-filter__tabs historically (a flex child
+     otherwise sizes to its content's min-content width rather than
+     the column it's actually in). */
+  .content-filter__category {
+    display: block;
+    width: 100%;
+    min-width: 0;
+  }
+
   .content-filter__month {
     width: 100%;
     min-width: 0;
   }
 
-  .content-filter__tabs {
-    flex-wrap: nowrap;
-    gap: 20px;
-    overflow-x: auto;
-    padding-bottom: 16px;
-    -webkit-overflow-scrolling: touch;
-    position: relative;
-  }
-
-  .content-filter__tabs::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: 1px;
-    background-color: #D8D5CC;
-  }
-
-  .content-filter__tab {
-    flex: 0 0 auto;
-    white-space: nowrap;
-  }
-
-  .content-filter__tab.is-active::after {
-    bottom: -16px; /* matches .content-filter__tabs's own padding-bottom here, now that the divider lives on it instead of .content-filter */
-  }
-
+  .content-filter__category-select,
   .content-filter__month-select {
     width: 100%;
   }
