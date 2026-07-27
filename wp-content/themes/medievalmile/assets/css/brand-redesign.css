@@ -3025,3 +3025,54 @@ body.page-id-753 #two_column_content_2 .page-content {
     width: 100%;
   }
 }
+
+/* ==========================================================================
+   Gravity Forms "Name" field (First/Last): force side-by-side layout
+   ========================================================================== */
+
+/* Contact, Weddings, and Events all use the same legacy Name-field
+   markup (.ginput_complex.ginput_container--name > .name_first /
+   .name_last spans) - but only Contact's page <head> enqueues Gravity
+   Forms' legacy stylesheet (formsmain.min.css), which is what actually
+   makes those spans render inline-block at ~50% width. Weddings/Events
+   only load the modern gform theme CSS, which has no rule for this
+   legacy markup at all, so their spans fall back to plain unstyled
+   inline elements - each one wide enough (from the generic input
+   styling) to force the second onto its own line, i.e. First/Last
+   stack instead of sitting side by side.
+   Rather than patch the two broken pages only (leaving them dependent
+   on whichever stylesheet WordPress happens to enqueue there), this
+   rule applies one flex-based layout unconditionally wherever the
+   field appears, so all three forms behave identically regardless of
+   that enqueue inconsistency. The !important on width/display is
+   needed to reliably beat legacy formsmain.min.css's own
+   `.gf_name_has_2 span{width:49.75%!important}` on Contact, where that
+   stylesheet is present and would otherwise still apply. */
+.gform_wrapper .ginput_complex.ginput_container--name {
+  display: flex !important;
+  gap: 16px; /* Gravity Forms' own established token - matches legacy
+    formsmain.min.css's padding-right:16px name-field spacing hack, and
+    the grid-row-gap:16px in its (unused here) modern grid CSS */
+  width: auto !important;
+}
+
+.gform_wrapper .ginput_complex.ginput_container--name .name_first,
+.gform_wrapper .ginput_complex.ginput_container--name .name_last {
+  display: block !important;
+  width: auto !important;
+  flex: 1;
+  padding-right: 0 !important;
+  margin-right: 0 !important;
+}
+
+/* Side-by-side is cramped once the shared form column narrows to
+   mobile widths (each field would be roughly (100% - 16px)/2 wide,
+   ~150-160px in this form's actual column) - stacked full-width reads
+   more usably there, same 767px breakpoint used site-wide elsewhere
+   (e.g. the content-filter component above). */
+@media (max-width: 767px) {
+  .gform_wrapper .ginput_complex.ginput_container--name {
+    flex-direction: column !important;
+    gap: 16px; /* vertical gap between the now-stacked fields - same token as the horizontal gap above */
+  }
+}
