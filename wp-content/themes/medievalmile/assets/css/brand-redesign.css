@@ -1594,10 +1594,34 @@ body .nl__right .gform_wrapper form .gform_footer input:hover {
   display: none !important;
 }
 
+/* bottom aligns the toggle's own vertical CENTER with the "Book
+   Tickets" CTA's vertical center, rather than the two floating at
+   independent, visually disconnected heights (the toggle was
+   positioned purely against .hero__item's own bottom edge, unrelated
+   to where the CTA happens to land inside .hero__item__copy's
+   flex-column/justify-content:flex-end layout).
+   The formula tracks .hero__item__copy's own unconditional (unscoped)
+   vw-based positioning of the CTA - NOT the ">=1920px scoped, frozen
+   below" pattern used elsewhere in this file - because the CTA's
+   underlying padding-bottom (site.css, 8.38542vw) and the .btn
+   element's own margin-bottom (0.78125vw) and rendered height are
+   ALL unconditional vw down to the same 1279px breakpoint, so
+   matching that exact mechanic (not capping earlier) keeps the two
+   elements aligned continuously across 1280-1920px+, not just at
+   the endpoints:
+     8.38542vw  - .hero__item__copy padding-bottom (CTA's own gap from hero's bottom edge)
+   + 0.78125vw  - .btn's own margin-bottom (site.css)
+   + 1.82250vw  - half the .btn's rendered height (measured 69.98px @1920 = 3.6450vw, halved)
+   = 10.98917vw - the CTA's vertical center, measured as distance from hero's bottom edge
+   minus 24px   - half the toggle's own FIXED 48px height (not vw-scaled, so this term stays a flat px, not vw)
+   Verified against live getBoundingClientRect measurements at 1920px
+   (predicted 186.99px, measured 186.99px) - see content-filter-style
+   fixes elsewhere in this file for why fixed-vs-vw terms can't just be
+   averaged/summed without calc(). */
 .hero__video-toggle {
   position: absolute;
   right: 2.34375vw;
-  bottom: 3.64583vw;
+  bottom: calc(10.98917vw - 24px);
   z-index: 10; /* must sit above .hero__item .container (z-index:9), which
                   otherwise overlays the button and swallows every click */
   width: 48px;
@@ -1612,6 +1636,19 @@ body .nl__right .gform_wrapper form .gform_footer input:hover {
   color: #000;
   cursor: pointer;
   transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+/* .hero__item__copy's padding-bottom (and .btn's own sizing) both
+   switch from the unconditional vw rates above to flat frozen px
+   values at this same 1279px breakpoint (site.css) - matching that
+   here with a directly-measured frozen offset (rather than the calc()
+   formula above, which only holds in the unconditional-vw zone)
+   keeps the toggle aligned with the CTA's center through the whole
+   1279px-767px range too. */
+@media (max-width: 1279px) {
+  .hero__video-toggle {
+    bottom: 98.5px;
+  }
 }
 
 .hero__video-toggle:hover {
@@ -3075,4 +3112,40 @@ body.page-id-753 #two_column_content_2 .page-content {
     flex-direction: column !important;
     gap: 16px; /* vertical gap between the now-stacked fields - same token as the horizontal gap above */
   }
+}
+
+/* ==========================================================================
+   Content filter "no results" empty state (What's On / Blog)
+   ========================================================================== */
+
+/* Fixed 70px height regardless of screen size, per explicit request -
+   not scaled with the rest of this component's fluid conventions.
+   Hidden by default; content-filter.js toggles [hidden] off in place of
+   the card grid (not stacked below it) whenever the active tab+month
+   combination matches zero items. */
+.content-filter__empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  height: 70px;
+  background-color: #fff;
+}
+
+.content-filter__empty[hidden] {
+  display: none;
+}
+
+.content-filter__empty__icon {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  color: #161412; /* standard site text black */
+}
+
+.content-filter__empty__text {
+  font-family: Montserrat-Medium;
+  font-size: 16px;
+  color: #161412;
 }

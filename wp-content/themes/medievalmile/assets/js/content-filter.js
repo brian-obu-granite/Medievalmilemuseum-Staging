@@ -43,6 +43,7 @@
 		// would match it first and populate month options into the wrong
 		// <select>.
 		var monthSelect = root.querySelector('.content-filter__month .content-filter__month-select');
+		var emptyState = grid.parentElement.querySelector('.content-filter__empty');
 		var today = startOfToday();
 
 		var items = Array.prototype.slice.call(grid.querySelectorAll(itemSelector)).map(function (el) {
@@ -103,9 +104,20 @@
 		}
 
 		function render() {
+			var visibleCount = 0;
 			items.forEach(function (item) {
-				item.el.style.display = matches(item) ? '' : 'none';
+				var isVisible = matches(item);
+				item.el.style.display = isVisible ? '' : 'none';
+				if (isVisible) { visibleCount++; }
 			});
+			// Empty state REPLACES the grid rather than stacking below it -
+			// hiding the grid container itself (not just its individual
+			// cards, all of which would otherwise still be display:none but
+			// leave the grid's own padding/gap behind as empty whitespace).
+			if (emptyState) {
+				emptyState.hidden = visibleCount > 0;
+			}
+			grid.style.display = visibleCount === 0 ? 'none' : '';
 		}
 
 		// Shared by both the desktop tab row and the mobile category
