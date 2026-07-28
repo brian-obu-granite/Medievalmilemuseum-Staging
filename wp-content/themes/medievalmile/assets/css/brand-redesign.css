@@ -3229,7 +3229,7 @@ body.page-id-753 #two_column_content_2 .page-content {
   align-items: center;
   justify-content: space-between;
   padding-bottom: 24px;
-  border-bottom: 1px solid #E3E0D8;
+  border-bottom: 1px solid #D8D5CC;
 }
 
 @media (min-width: 1920px) {
@@ -3265,7 +3265,7 @@ body.page-id-753 #two_column_content_2 .page-content {
 
 /* Divider between items, not before the first one. */
 .info-strip__item:not(:first-child) {
-  border-left: 1px solid #E3E0D8;
+  border-left: 1px solid #D8D5CC;
 }
 
 .info-strip__icon {
@@ -3372,7 +3372,7 @@ body.page-id-753 #two_column_content_2 .page-content {
   .info-strip__item {
     padding: 0;
     border-left: none !important;
-    border-top: 1px solid #E3E0D8;
+    border-top: 1px solid #D8D5CC;
     padding-top: 20px;
   }
 
