@@ -3149,3 +3149,235 @@ body.page-id-753 #two_column_content_2 .page-content {
   font-size: 16px;
   color: #161412;
 }
+
+/* ==========================================================================
+   Homepage info strip (Opening Today / Ticket Prices / Find Us)
+   Sits between the hero and "Explore the Museum". Fluid sizing follows
+   the site's established 1920px-baseline convention: vw rates scoped
+   to >=1920px, with the value each evaluates to AT 1920 held flat as
+   the base for the whole <1920px range - avoiding the "unconditional
+   vw down to 1280, then a mismatched frozen value" jump bug fixed
+   elsewhere in this file.
+   ========================================================================== */
+
+.info-strip__sec {
+  padding-top: 44px; /* 40px + 10% */
+  padding-bottom: 44px;
+}
+
+@media (min-width: 1920px) {
+  .info-strip__sec {
+    padding-top: 2.29167vw; /* 44px @1920 */
+    padding-bottom: 2.29167vw;
+  }
+}
+
+/* Left edge deliberately matches "Explore the Museum"'s own heading
+   (.slider__copy__heading, in the section directly below), rather
+   than using the generic .container gutter - that heading isn't
+   positioned via any reusable "grid" class at all: it's the
+   side-effect of .slider__copy (a percentage-width column,
+   36.833% at this tier) containing .slider__copy__inner (a
+   fixed-474px box right-aligned via margin-left:auto), so its actual
+   left inset is (copy's % of viewport) minus (474px), not a flat
+   value. Empirically confirmed by measuring .slider__copy__heading's
+   own rendered left position directly (not by reading the CSS
+   percentages alone, since percentage/vw math don't round the same
+   way against a scrollbar-bearing viewport) at each of its own
+   breakpoints - which don't line up with this site's usual
+   1920/1279/991/767 tiers, but 1920/1440/1279/991 instead:
+     >=1441px: calc(36.833% - 474px)      - matches .slider__copy__inner's fixed-474px tier
+     1280-1440px: calc(36.833% - 32vw)    - matches its width:32vw tier
+     992-1279px: 30px flat                 - matches its 1279px AND 1199px tiers (both resolve to 30px)
+     <=991px: 15px flat                    - matches its 991px tier straight through to mobile
+   Percentage (not vw) is used for the "36.833%" term specifically
+   because .slider__copy's own width is a % of its (unpadded,
+   full-bleed) parent - vw would resolve against the raw viewport
+   instead, off by the scrollbar's width. */
+.info-strip__container {
+  padding-left: calc(36.833% - 474px);
+  padding-right: 1.5625vw; /* matches .container's own right-side gutter */
+}
+
+@media (max-width: 1440px) {
+  .info-strip__container {
+    padding-left: calc(36.833% - 32vw);
+  }
+}
+
+@media (max-width: 1279px) {
+  .info-strip__container {
+    padding-left: 30px;
+    padding-right: 30px;
+  }
+}
+
+@media (max-width: 991px) {
+  .info-strip__container {
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+}
+
+/* Divider lives here (not on .info-strip__sec, which spans the full
+   viewport) since .info-strip already sits inset inside
+   .info-strip__container's padding, i.e. it's already exactly the
+   content width - no need to duplicate that container's left/right
+   grid-offset formula just to draw a border at the same edges. */
+.info-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #E3E0D8;
+}
+
+@media (min-width: 1920px) {
+  .info-strip {
+    padding-bottom: 1.25vw; /* 24px @1920 */
+  }
+}
+
+.info-strip__item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+  text-decoration: none;
+  color: #161412;
+  padding: 0 24px;
+}
+
+@media (min-width: 1920px) {
+  .info-strip__item {
+    gap: 0.83333vw; /* 16px @1920 */
+    padding: 0 1.25vw; /* 24px @1920 */
+  }
+}
+
+.info-strip__item:first-child {
+  padding-left: 0;
+}
+
+.info-strip__item:last-child {
+  padding-right: 0;
+}
+
+/* Divider between items, not before the first one. */
+.info-strip__item:not(:first-child) {
+  border-left: 1px solid #E3E0D8;
+}
+
+.info-strip__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  color: #161412;
+}
+
+.info-strip__icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+@media (min-width: 1920px) {
+  .info-strip__icon {
+    width: 1.66667vw; /* 32px @1920 */
+    height: 1.66667vw;
+  }
+}
+
+.info-strip__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+/* 16px, matching .acc__time's exact size/pattern - the smallest size
+   actually reused elsewhere on the site for this kind of small
+   body/UI text, rather than the previous 14px (a one-off found in no
+   other component). */
+.info-strip__label {
+  font-family: Montserrat-Medium;
+  font-size: 16px;
+  color: #6D6D6D;
+  line-height: 1.2;
+}
+
+@media (min-width: 1920px) {
+  .info-strip__label {
+    font-size: 0.83333vw; /* 16px @1920, scales up only past 1920 - same as .acc__time */
+  }
+}
+
+/* Reuses the established --eyebrow-size-* token directly (not just its
+   1920 literal), so this stays in sync with every other eyebrow-tier
+   element (.ic__sub-heading, .slider__copy__sub_heading, etc.) if that
+   token is ever updated centrally. */
+.info-strip__value {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: Montserrat-SemiBold;
+  font-size: var(--eyebrow-size-1279); /* 20px - the flat value for the whole <1920px range */
+  color: #161412;
+  line-height: 1.2;
+}
+
+@media (min-width: 1920px) {
+  .info-strip__value {
+    font-size: var(--eyebrow-size-1920); /* 22px @1920 */
+    gap: 0.41667vw; /* 8px @1920 */
+  }
+}
+
+@media (max-width: 767px) {
+  .info-strip__value {
+    font-size: var(--eyebrow-size-767); /* 18px */
+  }
+}
+
+/* Arrow is reserved space (not display:none) so it doesn't shift the
+   value text sideways when it appears - just fades/slides in on
+   hover, matching the "Learn More" arrow already used on activity
+   cards elsewhere on the site (.cg__card__arrow), reused here as an
+   inline SVG rather than that class directly, since here it needs to
+   be hover-revealed rather than always visible. */
+.info-strip__arrow {
+  width: 16px;
+  height: 9px;
+  flex-shrink: 0;
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.info-strip__item:hover .info-strip__arrow,
+.info-strip__item:focus-visible .info-strip__arrow {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+@media (max-width: 767px) {
+  .info-strip {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 20px;
+  }
+
+  .info-strip__item {
+    padding: 0;
+    border-left: none !important;
+    border-top: 1px solid #E3E0D8;
+    padding-top: 20px;
+  }
+
+  .info-strip__item:first-child {
+    border-top: none;
+    padding-top: 0;
+  }
+}
