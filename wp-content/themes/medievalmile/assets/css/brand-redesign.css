@@ -3194,14 +3194,21 @@ body.page-id-753 #two_column_content_2 .page-content {
    because .slider__copy's own width is a % of its (unpadded,
    full-bleed) parent - vw would resolve against the raw viewport
    instead, off by the scrollbar's width. */
+/* padding-right mirrors padding-left's exact formula (not .container's
+   plain gutter) so the row sits symmetrically in the viewport - the
+   left value alone matches "Explore the Museum"'s heading position,
+   but using it on the left only (with a small plain gutter on the
+   right) made the whole row read as pushed toward the right edge:
+   227.66px of space on the left @1920 vs just 45px on the right. */
 .info-strip__container {
   padding-left: calc(36.833% - 474px);
-  padding-right: 1.5625vw; /* matches .container's own right-side gutter */
+  padding-right: calc(36.833% - 474px);
 }
 
 @media (max-width: 1440px) {
   .info-strip__container {
     padding-left: calc(36.833% - 32vw);
+    padding-right: calc(36.833% - 32vw);
   }
 }
 
@@ -3348,8 +3355,8 @@ body.page-id-753 #two_column_content_2 .page-content {
    inline SVG rather than that class directly, since here it needs to
    be hover-revealed rather than always visible. */
 .info-strip__arrow {
-  width: 16px;
-  height: 9px;
+  width: 28.8px; /* 16 -> 24 -> 36 -> -20%: 28.8 */
+  height: 16.2px; /* 9 -> 13.5 -> 20.25 -> -20%: 16.2 */
   flex-shrink: 0;
   opacity: 0;
   transform: translateX(-4px);
