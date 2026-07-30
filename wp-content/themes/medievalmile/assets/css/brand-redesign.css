@@ -231,130 +231,92 @@ html {
    sized by its own class). A bare tag selector keeps the intended
    hierarchy: any class rule still beats it.
 
-   Every rung now carries an explicit 1279/991/767 freeze ladder of its
-   own - h1 and h2 previously had none here, silently falling through to
-   mismatched leftover values (see .page-banner__copy h1 and the h2-tier
-   component classes below, both fixed the same way). */
-@media (min-width: 1920px) {
-  h1 { font-size: var(--h1-size-1920); }
-  h2 { font-size: var(--h2-size-1920); }
-  h3 { font-size: var(--h3-size-1920); }
-  h4 { font-size: var(--h4-size-1920); }
-  h6 { font-size: var(--h6-size-1920); }
-}
-
-@media (max-width: 1919px) {
-  h1 { font-size: var(--h1-size-1279); }
-  h2 { font-size: var(--h2-size-1279); }
-  h3 { font-size: var(--h3-size-1279); }
-  h4 { font-size: var(--h4-size-1279); }
-}
-@media (max-width: 991px) {
-  h1 { font-size: var(--h1-size-991); }
-  h2 { font-size: var(--h2-size-991); }
-  h3 { font-size: var(--h3-size-991); }
-  h4 { font-size: var(--h4-size-991); }
-}
-@media (max-width: 767px) {
-  h1 { font-size: var(--h1-size-767); }
-  h2 { font-size: var(--h2-size-767); }
-  h3 { font-size: var(--h3-size-767); }
-  h4 { font-size: var(--h4-size-767); }
-}
+   SECOND ROUND FIX: the original fix here (flat 1279/991/767 freeze steps,
+   vw rate scoped to only apply >=1920px) stopped the "backwards jump right
+   at 1280px" bug, but replaced it with a new one - each tier is perfectly
+   FLAT across the entire 992-1919px range. A column that holds this text
+   (e.g. .ic__row's copy column) shrinks continuously with viewport width
+   the whole way down, but the font inside it doesn't move at all across
+   that same range - so at the narrow end (e.g. 1024px) the text is
+   proportionally much bigger relative to its own container than it is at
+   1919px, wrapping onto extra lines and reading as oversized/disproportio-
+   nate, exactly the symptom reported. Replaced every tier's three flat
+   steps with a single continuous two-point linear interpolation between
+   the same already-correct endpoints (1920px and 767px), using the
+   standard fluid-type formula: slope = (max-min)/(1920-767), intercept =
+   min - slope*767, expressed as calc(SLOPEvw + INTERCEPTpx). max() (not
+   clamp()) floors at the 767px value and lets the rate keep scaling
+   UNBOUNDED above 1920px, matching how every one of these tiers already
+   behaves at its own >=1920px baseline - clamping the top end would
+   reintroduce the exact "looks too small next to a bigger screen" bug
+   found on the hero title below at 2560px+. */
+h1 { font-size: max(54px, calc(3.5559vw + 26.726px)); }   /* 95px@1920, 54px@767 */
+h2 { font-size: max(40px, calc(2.6019vw + 20.043px)); }   /* 70px@1920, 40px@767 */
+h3 { font-size: max(40px, calc(1.2142vw + 30.687px)); }   /* 54px@1920, 40px@767 */
+h4 { font-size: max(36px, calc(0.69384vw + 30.678px)); }  /* 44px@1920, 36px@767 */
 
 /* h6 rung mobile ladder (its own extra 1199px step predates this change and
    isn't shared by any other rung - kept as-is, just tokenized). */
+@media (min-width: 1920px) { h6 { font-size: var(--h6-size-1920); } }
 @media (max-width: 1919px) { h6 { font-size: var(--h6-size-1279); } }
 @media (max-width: 1199px) { h6 { font-size: var(--h6-size-1199); } }
 @media (max-width: 991px)  { h6 { font-size: var(--h6-size-991); } }
 @media (max-width: 767px)  { h6 { font-size: var(--h6-size-767); } }
 
 /* Homepage "Big Text" hero title (e.g. "800 Years of History") - its own
-   separate 120px tier, not part of the numbered h1-h6 rungs, but it had
-   the exact same >=1920px-calibrated-vw-rate-left-unbounded bug: 6.25vw
-   evaluates to 80px at 1280px wide, then crashes to a flat 45px one pixel
-   narrower at 1279px - a 44% single-step cliff, and simply capping the vw
-   rate to >=1920px (like every other tier above) would just relocate that
-   same cliff to the 1920px boundary instead (45px is only 37.5% of the
-   120px baseline, a much bigger gap than any h1-h6 tier has). Instead this
-   keeps both already-established endpoints - 120px desktop, 45px mobile -
-   and adds two new intermediate steps so the decline is gradual the whole
-   way down, the same shape as every other rung's ladder. */
-@media (min-width: 1920px) {
-  .hero__item__copy__heading { font-size: 6.25vw; }
-}
-@media (max-width: 1919px) {
-  .hero__item__copy__heading { font-size: 85px; }
-}
-@media (max-width: 991px) {
-  .hero__item__copy__heading { font-size: 60px; }
-}
-@media (max-width: 767px) {
-  .hero__item__copy__heading { font-size: 45px; }
+   separate 120px tier, not part of the numbered h1-h6 rungs. Same
+   continuous two-point formula as the rung above: slope =
+   (120-45)/(1920-767) = 6.50477vw; intercept = 45 - slope*767 = -4.88816px.
+   max() (not clamp()) so the rate keeps climbing unbounded above 1920px -
+   an earlier version of this fix used clamp() with a 120px ceiling, which
+   held the title flat at 120px all the way from 1920px up to 2560px+,
+   looking too small relative to the much wider screen there (the same
+   "flat plateau" bug this whole rewrite is fixing, just relocated above
+   1920px instead of below it). */
+.hero__item__copy__heading {
+  font-size: max(45px, calc(6.50477vw - 4.88816px));
 }
 
 /* Inner-page banner titles (h1, e.g. "Explore", "What's On" - the only
    real-world h1 instance site-wide besides the homepage's separate "Big
    Text" hero): site.css sizes .page-banner__copy h1 at higher specificity
-   than the bare h1 rung above, so it needs its own copy of every step -
-   including the freeze ladder site.css never gave it. It previously fell
-   back to a leftover 45px/40px 2-step tied to an old 70px baseline: a
-   disproportionate ~53% single-step crash right at the old 1280px
-   breakpoint, compared to every other title's much gentler decline. */
-@media (min-width: 1920px) {
-  .page-banner__copy h1 { font-size: var(--h1-size-1920); }
-}
-@media (max-width: 1919px) { .page-banner__copy h1 { font-size: var(--h1-size-1279); } }
-@media (max-width: 991px)  { .page-banner__copy h1 { font-size: var(--h1-size-991); } }
-@media (max-width: 767px)  { .page-banner__copy h1 { font-size: var(--h1-size-767); } }
+   than the bare h1 rung above, so it needs its own copy of the same
+   formula rather than inheriting it. */
+.page-banner__copy h1 { font-size: max(54px, calc(3.5559vw + 26.726px)); }
 
 /* H2-tier component classes: all of these already rendered at the exact
-   same 70px size as bare h2 at the 1920px baseline (coincidentally, since each was
-   hand-tuned independently) but diverged hard below it -
-   .slider__copy__heading/.gallery__head__heading/.cg__head h2/.cta__head h2
-   were flat at a single 40px cliff with no gradual steps, and .ic__heading
-   had its own slightly-off 991px value (55px vs 50px). All five now share
-   the same gradual ladder as bare h2/.quote_box__heading (which already had
-   the right shape and didn't need changing). */
-@media (min-width: 1920px) {
-  .ic__heading,
-  .slider__copy__heading,
-  .gallery__head__heading,
-  .cg__head h2,
-  .cta__head h2 { font-size: var(--h2-size-1920); }
-}
-@media (max-width: 1919px) {
-  .ic__heading,
-  .slider__copy__heading,
-  .gallery__head__heading,
-  .cg__head h2,
-  .cta__head h2 { font-size: var(--h2-size-1279); }
-}
-@media (max-width: 991px) {
-  .ic__heading,
-  .slider__copy__heading,
-  .gallery__head__heading,
-  .cg__head h2,
-  .cta__head h2 { font-size: var(--h2-size-991); }
-}
-@media (max-width: 767px) {
-  .ic__heading,
-  .slider__copy__heading,
-  .gallery__head__heading,
-  .cg__head h2,
-  .cta__head h2 { font-size: var(--h2-size-767); }
-}
+   same 70px size as bare h2 at the 1920px baseline (coincidentally, since
+   each was hand-tuned independently) - now share bare h2's own continuous
+   formula instead of their own copy of the old flat ladder. */
+.ic__heading,
+.slider__copy__heading,
+.gallery__head__heading,
+.cg__head h2,
+.cta__head h2 { font-size: max(40px, calc(2.6019vw + 20.043px)); }
 
 /* .bic__copy__item .ic__heading (dark-overlay variant of the same "History
    of the Building"-style heading, e.g. on the Explore page) has its own
    higher-specificity site.css override that would otherwise beat the
-   simple .ic__heading rule above and keep it at a one-off 45px instead of
-   the shared h2-tier value. */
-@media (max-width: 991px) {
-  .bic__copy__item .ic__heading { font-size: var(--h2-size-991); }
-}
-@media (max-width: 767px) {
-  .bic__copy__item .ic__heading { font-size: var(--h2-size-767); }
+   simple .ic__heading rule above - needs its own copy of the same h2
+   formula to actually reach this element. */
+.bic__copy__item .ic__heading { font-size: max(40px, calc(2.6019vw + 20.043px)); }
+
+/* .bic__copy's own top/bottom margin (site.css: 5.625vw unconditional,
+   giving exactly 108px at the 1920px baseline) is overridden to a flat
+   108px for the ENTIRE 767-1919px range - not a freeze at some smaller
+   value, the exact same 108px the unconditional rate already gives at
+   1920px, so margin doesn't shrink AT ALL below 1920px until suddenly
+   dropping to 0 at 767px. At narrower widths in that range (e.g. 1024px)
+   this flat 216px of total margin (108 top + 108 bottom) is a large
+   fraction of the whole "Family Visits"/.bic__inner block's height,
+   reading as excess empty space once the heading/copy text inside also
+   shrank via the earlier type-scale fixes. Continuous two-point
+   interpolation between the two real endpoints - 108px@1920px (unchanged)
+   and 0@767px (already the explicit <=767px value) - removes the flat
+   plateau: slope = (108-0)/(1920-767) = 9.3669vw; intercept =
+   0 - slope*767 = -71.84px. */
+.bic__copy {
+  margin: max(0px, calc(9.3669vw - 71.84px)) 0;
 }
 
 /* Card-title tier: .lbs__item__card__heading ("Book Your Tickets"/"Book an
@@ -370,83 +332,107 @@ html {
    1.97917vw (38px@1920) unconditionally, freezing to 32px only below
    1279px - at 1280px wide that vw rate evaluates to just ~25px, so
    crossing to 1279px caused a 26% backwards jump UP to 32px, the same bug
-   class fixed for h1-h6 earlier. Scoping the vw rate to >=1920px and
-   holding 32px flat for the entire 992-1919px range (as with every other
-   tier) removes that jump. */
-@media (min-width: 1920px) {
-  .lbs__item__card__heading,
-  .slider__slide-heading {
-    font-size: var(--card-title-size-1920);
-  }
-}
-@media (max-width: 1919px) {
-  .lbs__item__card__heading,
-  .slider__slide-heading {
-    font-size: var(--card-title-size-1279);
-  }
+   class fixed for h1-h6 earlier.
+   SECOND ROUND FIX: initially just scoped the vw rate to >=1920px and
+   held 32px flat below that, matching the numbered rungs' first-round
+   fix - but that's the same "flat plateau" bug found and fixed
+   everywhere else in this file. No 767px anchor was ever established for
+   this tier, so this first reused the 1920/1279 endpoints directly
+   (38px@1920, 32px@1279), giving ~29.6px@1024px.
+
+   THIRD ROUND FIX: confirmed the 29.6px value WAS applying correctly and
+   identically on every card (slider and lbs alike, including "How to
+   Find Us") - the remaining "still too big" read wasn't a formula bug,
+   it's that .lbs__item__card__heading's own cards are only ~156px wide
+   at 1024px (vs .slider__slide-heading's ~253px) - a two-word title at
+   29.6px is simply a lot of text for that narrow a box. Re-anchored to
+   target a visibly smaller 24px specifically at 1024px (down from
+   29.6px) while keeping the untouched 38px@1920 endpoint: slope =
+   (38-24)/(1920-1024) = 1.5625vw; intercept = 24 - slope*1024 = 8px.
+   Floors at 20px (this formula's own ~767px value). */
+.lbs__item__card__heading,
+.slider__slide-heading {
+  font-size: max(20px, calc(1.5625vw + 8px));
 }
 
-/* H5-tier component classes: the same shape of bug as H2 above - all match
-   the 32px bare-h5 baseline at 1920px (coincidentally), but each had its
-   own mismatched sub-1280 ladder (.acc__title's FAQ question text at 28/22/20,
-   .cg__card__heading flat at 32px, .cgw__card__heading/.cta__sub-head h5
-   flat at 24px). All four now share bare h5's own gradual 30/26/24 ladder. */
-@media (min-width: 1920px) {
-  .acc__title,
-  .cg__card__heading,
-  .cgw__card__heading,
-  .cta__sub-head h5 { font-size: var(--h5-size-1920); }
-}
-@media (max-width: 1919px) {
-  .acc__title,
-  .cg__card__heading,
-  .cgw__card__heading,
-  .cta__sub-head h5 { font-size: var(--h5-size-1279); }
-}
-@media (max-width: 991px) {
-  .acc__title,
-  .cg__card__heading,
-  .cgw__card__heading,
-  .cta__sub-head h5 { font-size: var(--h5-size-991); }
-}
-@media (max-width: 767px) {
-  .acc__title,
-  .cg__card__heading,
-  .cgw__card__heading,
-  .cta__sub-head h5 { font-size: var(--h5-size-767); }
+/* H5-tier component classes, now including a bare h5/.h5 rule (previously
+   relied on site.css's own unpatched, unbounded-below-1920 h5 rule - the
+   exact same bug class as everywhere else here). .h5 has to be listed
+   explicitly alongside bare h5: site.css's own competing rule is written
+   as ".h5, h5" - for markup using class="h5" (e.g. the testimonial copy
+   text in testimonials-loader.js), that rule's ".h5" branch (specificity
+   0,1,0) beats a plain "h5" selector here (0,0,1), so this needs the same
+   ".h5" branch to actually win.
+   Adding ".h5" this way also now reaches .blog-heading (blog card titles,
+   markup is class="blog-heading h5") which weren't part of the original
+   consolidation - its own site.css rule already matched the exact same
+   32px@1920 rate as h5 (coincidentally, like every other tier here) but
+   had its own slightly-off flat 32px sub-1280 value instead of h5's 30px -
+   the same one-off-drift pattern as every other class folded into a
+   shared tier elsewhere in this file, so it's included here rather than
+   left to silently conflict with the new .h5 rule by equal specificity.
+   All share the same continuous formula as the numbered rungs above. */
+h5,
+.h5,
+.blog-heading,
+.acc__title,
+.cg__card__heading,
+.cgw__card__heading,
+.cta__sub-head h5 { font-size: max(24px, calc(0.69384vw + 18.678px)); } /* 32px@1920, 24px@767 */
+
+/* .blog-heading inside the blog carousel/slider caption markup
+   (.slider__slide-image figcaption.slider__slide__bloginfo .bloginfo__inner
+   .blog-heading) is reached via a much higher-specificity descendant
+   chain in site.css that beats the plain .blog-heading selector above -
+   needs its own copy of the exact same formula to actually apply here. */
+.slider__slide-image figcaption.slider__slide__bloginfo .bloginfo__inner .blog-heading {
+  font-size: max(24px, calc(0.69384vw + 18.678px));
 }
 
-/* Eyebrow/label tier (~22px @1920). .ic__sub-heading already had the
-   fuller 2-step ladder (20/18); the other four were flat at a single 18px
-   cliff. All five now share the fuller ladder. */
-@media (min-width: 1920px) {
-  .ic__sub-heading,
-  .slider__copy__sub_heading,
-  .quote_box__sub-heading,
-  .cg__head h5,
-  .gallery__head__sub-heading { font-size: var(--eyebrow-size-1920); }
-}
-@media (max-width: 1919px) {
-  .ic__sub-heading,
-  .slider__copy__sub_heading,
-  .quote_box__sub-heading,
-  .cg__head h5,
-  .gallery__head__sub-heading { font-size: var(--eyebrow-size-1279); }
-}
-@media (max-width: 767px) {
-  .ic__sub-heading,
-  .slider__copy__sub_heading,
-  .quote_box__sub-heading,
-  .cg__head h5,
-  .gallery__head__sub-heading { font-size: var(--eyebrow-size-767); }
-}
+/* Eyebrow/label tier (~22px @1920) - same continuous formula treatment. */
+.ic__sub-heading,
+.slider__copy__sub_heading,
+.quote_box__sub-heading,
+.cg__head h5,
+.gallery__head__sub-heading { font-size: max(18px, calc(0.34692vw + 15.339px)); } /* 22px@1920, 18px@767 */
 
 /* body .nl__heading (the h3 rung's one other member) already matched the
-   h3 ladder exactly - tokenized here for consistency, values unchanged. */
-@media (min-width: 1920px) { body .nl__heading { font-size: var(--h3-size-1920); } }
-@media (max-width: 1919px) { body .nl__heading { font-size: var(--h3-size-1279); } }
-@media (max-width: 991px)  { body .nl__heading { font-size: var(--h3-size-991); } }
-@media (max-width: 767px)  { body .nl__heading { font-size: var(--h3-size-767); } }
+   h3 ladder exactly - shares the same continuous formula now too. */
+body .nl__heading { font-size: max(40px, calc(1.2142vw + 30.687px)); }
+
+/* .btn/.btn-link (every CTA button/link site-wide): site.css's own base
+   rule is 1.14583vw completely unconditional - no >=1920px scoping at
+   all - overridden to a flat 18px only <=1279px. Between 1280-1919px nothing
+   overrides it, so it falls back to the raw uncapped vw rate: ~15px at
+   1280px wide, rising to the full 22px only at 1920px - a backwards jump
+   in reverse (small in the middle of the range, jumping UP to the flat
+   18px the instant the viewport narrows past 1280px), the same bug class
+   as every heading tier above, just never given the shared-token
+   treatment before now. Same continuous two-point formula, coincidentally
+   identical to the eyebrow tier above (also 22px@1920/18px@767). */
+.btn,
+.btn-link { font-size: max(18px, calc(0.34692vw + 15.339px)); }
+
+/* Two contexts style their own button/link at higher specificity than the
+   bare .btn/.btn-link rule above (.hero__item__btn .btn - the homepage
+   hero's own "Book Tickets" CTA - and .top-bar__inner .btn-link, the
+   top announcement bar's "Book Now" link), each with their own copy of
+   the exact same flat-18px-below-1280/unbounded-vw-above-1280 bug -
+   need their own copy of the fix to actually take effect. */
+.hero__item__btn .btn,
+.top-bar__inner .btn-link { font-size: max(18px, calc(0.34692vw + 15.339px)); }
+
+/* .header-btm-mobile .btn ("Book Now" in the mobile hamburger menu header,
+   visible <=1199px only - display:none above that) has its own even more
+   specific selector chain in site.css, flat at 14px, completely unpatched
+   by any of the fixes above. Explicitly given its own smaller target (16px
+   at 1024px, not the 18.89px main CTA scale - confirmed intentionally
+   distinct/smaller for this compact mobile-nav context) rather than the
+   shared CTA formula: two-point interpolation between 14px@375px (its
+   original value, kept as the small-mobile floor) and 16px@1024px. */
+.header-footer-group .header-inner .header-titles-wrapper .header-btm-mobile .btn {
+  font-size: max(14px, calc(0.3082vw + 12.844px));
+}
 
 /* h3/h4/h5/h6 switch from Bartender (inherited from the generic .h1-.h6 rule
    above, same as every other heading level) to the real Macho Semibold.
@@ -1451,15 +1437,29 @@ body .nl__right .gform_wrapper form .gform_footer input:hover {
 
 /* The GRANDPARENT theme's own style.css (loaded before site.css and this
    file) separately caps .section-hero > .hero at max-height:480px at
-   <=767px - a leftover slick-carousel assumption from the same
-   adaptiveHeight-era design .hero__item's height fix above already
-   explains, just one level higher up the tree. With slick gone, nothing
-   ever needed that cap to stay at exactly the video's own height, but the
-   copy block now stacked below the video (a normal-flow, content-sized
-   yellow block) still overflowed past it, invisible until whatever
-   section came next painted over the tail end. Same fix, same reason, one
-   level up: let it size to its actual content instead. */
-@media (max-width: 767px) {
+   <=767px and max-height:560px at <=1279px - a leftover slick-carousel
+   assumption from the same adaptiveHeight-era design .hero__item's height
+   fix above already explains, just one level higher up the tree. With
+   slick gone, nothing ever needed that cap to stay at exactly the video's
+   own height, but the copy block now stacked below the video (a
+   normal-flow, content-sized yellow block) still overflowed past it,
+   invisible until whatever section came next painted over the tail end.
+   Same fix, same reason, one level up: let it size to its actual content
+   instead.
+   The <=1279px tier specifically also has to go for the .hero__item__copy
+   min-height fix (the "feature block" formula further up this file) to
+   actually take visible effect at all: without this, .hero__item itself
+   correctly grows taller to match a longer copy block, but this ancestor
+   still capped the whole section at the old flat 560px, so the extra
+   content rendered (overflow:visible, nothing clipped) but past this
+   section's own box - invisible until the next section's background
+   painted over it, same failure mode as the mobile case below.
+   1280px, not the usual sitewide 1279px convention: style.css's own
+   breakpoint for this specific rule is max-width:1280px (inclusive),
+   one pixel wider than the rest of the codebase's convention - matching
+   it exactly here, or the cap would still silently win at exactly
+   1280px, one pixel outside a max-width:1279px override. */
+@media (max-width: 1280px) {
   .section-hero > .hero {
     max-height: none;
   }
@@ -1488,9 +1488,22 @@ body .nl__right .gform_wrapper form .gform_footer input:hover {
   height: 54.6875vw;
 }
 
+/* SECOND ROUND FIX: this was a hard, flat 560px height (not min-height)
+   for the entire <=1279px range - a completely separate, independent
+   copy of the exact same value as .hero__item__copy's own min-height
+   fix above, coincidentally matching only because they both trace back
+   to the same original 54.6875vw/560px numbers. Fixing .hero__item__copy
+   alone (letting the copy content grow taller when needed) did nothing
+   here, since THIS box's height is hard-capped regardless of its
+   content's own height - the copy block just overflowed past .hero__item
+   own boundary once it grew past 560px. Same continuous formula as the
+   copy box fix (they need to move together exactly, so they use the
+   identical numbers), switched from height to min-height so it can also
+   grow to match copy on any future width/copy-length combination instead
+   of silently capping again. */
 @media (max-width: 1279px) {
   .hero__item {
-    height: 560px;
+    min-height: max(560px, calc(27.2905vw + 350.7px));
   }
 }
 
@@ -1545,6 +1558,30 @@ body .nl__right .gform_wrapper form .gform_footer input:hover {
   }
 }
 
+/* Hero copy box's min-height (site.css: 54.6875vw unconditionally,
+   frozen flat at 560px for the whole <=1279px range) has the exact same
+   "flat plateau" bug as every font-size tier fixed elsewhere in this
+   file, just applied to the box's own height instead. Content inside is
+   bottom-anchored (site.css: justify-content:flex-end), so a shorter box
+   directly means the title/copy/CTA/play-toggle sit closer to the top of
+   the hero, with a big gap of bare image below them - worse the further
+   below 1280px you go, since the box height (560px) stays perfectly flat
+   there while the >=1280px box (vw-scaled, 700px right at 1280px) keeps
+   growing smoothly above it, creating a real ~20% cliff right at the
+   1280px boundary. Same two-point interpolation as everywhere else,
+   calibrated to match this range's own two already-correct endpoints
+   exactly - 700px at 1280px (the value the untouched >=1280px vw rate
+   already gives there) and 560px at 767px (the original flat value,
+   preserved as the floor) - so it's perfectly continuous with the
+   >=1280px rule at the boundary and doesn't change anything there.
+   slope = (700-560)/(1280-767) = 27.2905vw; intercept =
+   560 - slope*767 = 350.7px. */
+@media (max-width: 1279px) {
+  .hero__item__copy {
+    min-height: max(560px, calc(27.2905vw + 350.7px));
+  }
+}
+
 /* Hero description text: the homepage's supporting line ("Make the
    Medieval Mile Museum...") switched from a <p> to an <h5> in the markup
    (h4 was tried first but read too large next to the heading above it).
@@ -1581,34 +1618,18 @@ body .nl__right .gform_wrapper form .gform_footer input:hover {
   line-height: 1.25;
 }
 
-/* font-size scoped to >=1920px, flat below - see the "Shared fluid
-   type-scale tokens" note above for why the vw rate can't apply unbounded
-   below its own 1920px baseline without creating a backwards jump. */
-@media (min-width: 1920px) {
-  .hero__item__copy__description h5,
-  .page-banner__copy__description p {
-    font-size: var(--h5-size-1920);
-  }
-}
-
-@media (max-width: 1919px) {
-  .hero__item__copy__description h5,
-  .page-banner__copy__description p {
-    font-size: var(--h5-size-1279);
-  }
-}
-
-@media (max-width: 991px) {
-  .hero__item__copy__description h5,
-  .page-banner__copy__description p {
-    font-size: var(--h5-size-991);
-  }
+/* Same continuous two-point formula as the shared h5 rung above (32px@1920,
+   24px@767, max() unbounded above 1920px) - previously its own copy of the
+   flat 1279/991/767 ladder, which had the same "disproportionate at
+   1024px" bug as every other tier fixed in that section. */
+.hero__item__copy__description h5,
+.page-banner__copy__description p {
+  font-size: max(24px, calc(0.69384vw + 18.678px));
 }
 
 @media (max-width: 767px) {
   .hero__item__copy__description h5,
   .page-banner__copy__description p {
-    font-size: var(--h5-size-767);
     color: #161412 !important;
     text-shadow: none !important;
   }
@@ -2020,6 +2041,21 @@ body .nl__right .gform_wrapper form .gform_footer input:hover {
    later in source order at equal specificity, leaving the first rule
    in effect only for 1280-1439px. The two formulas agree exactly at
    1440px (18px both ways), so there's no jump at the handoff. */
+/* Line-height alone (not font-size) also unified BELOW 1280px, closing
+   the same "fix only applies >=1280px" gap found throughout this file's
+   other tiers - site.css's own <1280px paragraph rules keep their
+   existing (already-fine) font-size steps, just inconsistent
+   line-heights (1.75 on .ic__description p, 1.5 on
+   .slider__copy__description p, etc), which is what actually reads as
+   "different copy" side by side at any width below 1280px. */
+p,
+.ic__description p,
+.quote_box__description p,
+.slider__copy__description p,
+body .nl__description {
+  line-height: 1.5;
+}
+
 @media (min-width: 1280px) {
   p,
   .ic__description p,
@@ -3435,11 +3471,26 @@ body.page-id-753 #two_column_content_2 .page-content {
    width above and below that, including <1280px where .ic__copy/.ic__img
    stack to full width instead of sitting side-by-side - a flat-below/
    vw-above split would reintroduce the exact "fixed at one breakpoint"
-   problem this replaces. */
+   problem this replaces.
+
+   SECOND ROUND FIX: a hard `height` here doesn't grow if the copy
+   column's own content needs more room than 39.0625vw gives (confirmed
+   at 1024px on "Family Visits" - copy text bled past the image's
+   height instead of the row growing to fit both). Switched to
+   min-height (the floor - guarantees the 750px@1920 proportional size
+   is never smaller than that) plus height:100% (fills whatever .ic__img
+   - the actual flex item, sibling to .ic__copy - ends up stretched to by
+   the row's own cross-size, which is driven by whichever column's
+   content is taller). Net effect: image stays at the proportional
+   39.0625vw size whenever copy fits inside it (matching every previously
+   verified width), and grows to match copy's own height instead of
+   leaving copy to overflow past it on the rare instance where copy needs
+   more room than that. */
 .ic__img__item:after {
   display: none;
 }
 
 .ic__img__item {
-  height: 39.0625vw;
+  min-height: 39.0625vw;
+  height: 100%;
 }
