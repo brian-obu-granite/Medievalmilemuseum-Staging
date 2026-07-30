@@ -135,7 +135,7 @@
   // - renderPageCarousel handles that case and returns true so the default
   // doesn't also run and get immediately overwritten.
   if (!renderPageCarousel(testimonials)) {
-    renderCarousel(testimonials, testimonials.slice(0, 4));
+    renderCarousel(testimonials, testimonials.slice(0, 2));
   }
 
   // Testimonials page: full list, static (no carousel/arrows/dots/CTA)
@@ -165,20 +165,20 @@
     return true;
   }
 
-  // Own testimonial first, then the homepage's own first 4, de-duplicated
+  // Own testimonial first, then the homepage's own first 2, de-duplicated
   // by title (covers events-exhibitions/admission-opening-hours, whose own
-  // testimonial already IS one of those 4), padding from the rest of the
-  // master list if de-duping ever left fewer than 4.
+  // testimonial already IS one of those 2), padding from the rest of the
+  // master list if de-duping ever left fewer than 2.
   function getSlidesForPage(testimonials, ownTestimonial) {
     const seen = new Set();
     const slides = [];
-    [ownTestimonial, ...testimonials.slice(0, 4)].forEach(t => {
-      if (seen.has(t.title) || slides.length >= 4) { return; }
+    [ownTestimonial, ...testimonials.slice(0, 2)].forEach(t => {
+      if (seen.has(t.title) || slides.length >= 2) { return; }
       seen.add(t.title);
       slides.push(t);
     });
-    let i = 4;
-    while (slides.length < 4 && i < testimonials.length) {
+    let i = 2;
+    while (slides.length < 2 && i < testimonials.length) {
       const t = testimonials[i];
       if (!seen.has(t.title)) { seen.add(t.title); slides.push(t); }
       i++;

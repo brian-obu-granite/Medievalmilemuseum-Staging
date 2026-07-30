@@ -812,28 +812,28 @@ body .nl__right .gform_wrapper form .gform_footer input:hover {
   mix-blend-mode: normal;
 }
 
-/* Pig sized to 448x363 at the 1920px baseline (own aspect ratio, distinct
-   from the shared --top-right sizing above): 448/1920=23.33333vw,
-   363/1920=18.90625vw. */
+/* Pig reduced 10% from 448x363 to 403.2x326.7 at the 1920px baseline (own
+   aspect ratio, distinct from the shared --top-right sizing above):
+   403.2/1920=21vw, 326.7/1920=17.01563vw. */
 .quote_box__shape--top-left {
   top: 1px;
   left: -1px;
   bottom: auto;
   right: auto;
-  width: 23.33333vw;
-  height: 18.90625vw;
+  width: 21vw;
+  height: 17.01563vw;
   object-position: left top;
 }
 
-/* Wolf sized to 502x341 at the 1920px baseline: 502/1920=26.14583vw,
-   341/1920=17.76042vw. */
+/* Wolf reduced 10% from 502x341 to 451.8x306.9 at the 1920px baseline:
+   451.8/1920=23.53125vw, 306.9/1920=15.98438vw. */
 .quote_box__shape--bottom-right {
   top: auto;
   left: auto;
   bottom: 1px;
   right: -1px;
-  width: 26.14583vw;
-  height: 17.76042vw;
+  width: 23.53125vw;
+  height: 15.98438vw;
   object-position: right bottom;
 }
 
@@ -901,26 +901,21 @@ body .nl__right .gform_wrapper form .gform_footer input:hover {
   height: 51.92708vw;
 }
 
-/* Homepage testimonial carousel + the testimonials page's full list -
-   two instances of the SAME testimonial component (one shows a slider of
-   4, the other every testimonial as a static list; a CSS change to one
-   selector here reaches both, exactly the two, not the other 10 unrelated
-   single-testimonial quote_box sections elsewhere on the site, which keep
-   site.css's own default spacing). site.css's own padding (6.82292vw
-   top/bottom = 131px at 1920) was sized for the old static single-
-   testimonial layout and left too little room once this component's own
-   content got taller (e.g. the homepage carousel's slider stack, up to
-   ~610px for the longest of its 4 reviews, plus the "More Testimonials"
-   link and arrow controls beneath it) - the tallest content was
-   overflowing .quote_box's own overflow:hidden top edge. Reduced to
-   3.85417vw (74px at 1920) for both instances. Scoped to >=1280px
-   (matching the fixed-height rule above, which only applies there too)
-   so it doesn't fight site.css's own <=1279px padding rule, where
-   .quote_box reverts to auto height and this isn't a concern. */
+/* Testimonials page's full list (.quote_box__list, still all 14 entries) -
+   site.css's own padding (6.82292vw top/bottom = 131px at 1920) was sized
+   for the old static single-testimonial layout and left too little room
+   for some of these longer reviews, overflowing .quote_box's own
+   overflow:hidden top edge. Reduced to 3.85417vw (74px at 1920), same as
+   the homepage carousel's own independent rule further below - but kept
+   scoped to >=1280px here (falling back to site.css's own <=1279px
+   padding/auto-height below that) since 14 reviews of very different
+   length is too much variance for one fixed mobile height to fit safely;
+   the homepage carousel doesn't have that problem (see below) but this
+   page still does, so it stays on the older, more conservative rule. */
 @media (min-width: 1280px) {
-  #quote_box_4 .quote_box,
   .quote_box__list .quote_box {
     padding: 3.85417vw 0;
+    height: 44.27083vw;
   }
 }
 
@@ -928,6 +923,37 @@ body .nl__right .gform_wrapper form .gform_footer input:hover {
   .quote_box {
     height: auto;
   }
+}
+
+/* Homepage testimonial carousel (#quote_box_4): fluid padding + height at
+   EVERY width, not just >=1280px like .quote_box__list above - reduced to
+   just 2 curated testimonials (testimonials-loader.js's slice(0,2) of the
+   14-item master list), so the length-variance problem that keeps the
+   14-item list on a conservative auto-below-1280 fallback doesn't apply
+   here. Own padding (3.85417vw, same rate as the list above) replaces
+   site.css's fixed 161px/51px mobile default, since a flat mobile padding
+   would eat into the smaller box's content room for no reason.
+
+   height uses max() instead of a single vw rate (or the site's usual
+   frozen-below/vw-above breakpoint split) because this box's actual
+   content-height need isn't monotonic with viewport width: text reflows
+   to more lines as the column narrows (site's fluid type scale is frozen
+   below 1920px, so font-size stops shrinking there but the column keeps
+   narrowing), while the vw-scaled box itself keeps shrinking - so a plain
+   vw rate that's sized correctly at 1920px (giving the approved
+   1147px -> 1000px total section height, i.e. 850px of quote_box's own
+   997px -> 850px) is already too small to fit the same content by 1024-
+   1279px. Measured this component's actual natural (unclipped) height at
+   375/768/1024/1279/1440/1920/2560px with this same padding applied: the
+   highest need in the range where 44.27083vw alone would be too small is
+   672px (at 1279px) - 720px is used as a flat floor with margin at every
+   width below the ~1626px crossover, then 44.27083vw takes over and
+   scales unbounded above it (matching 850px at 1920px, and still with
+   >100px to spare at 2560px, the widest tested) - continuous the whole
+   way, no breakpoint jump. */
+#quote_box_4 .quote_box {
+  padding: 3.85417vw 0;
+  height: max(720px, 44.27083vw);
 }
 
 /* ==========================================================================
@@ -3387,4 +3413,33 @@ body.page-id-753 #two_column_content_2 .page-content {
     border-top: none;
     padding-top: 0;
   }
+}
+
+/* .ic__sec / .ic__row component (image + copy, two-column) site-wide -
+   every instance, not just the homepage "Family Visits" block: reduced
+   from 951px to 750px at the 1920px baseline.
+
+   This component's height is NOT driven by the copy column at all - it's
+   driven by the IMAGE column, which site.css forces into a perfect square
+   via .ic__img__item's own width (the classic padding-top:100% aspect-
+   ratio trick on its ::after pseudo-element), then .ic__row's default
+   flex align-items:stretch (site.css sets no explicit align-items,
+   which computes to "normal" -> stretch for a flex container) stretches
+   the copy column to match that square's height. Confirmed empirically
+   on the homepage instance: forcing the copy content down to 1px left
+   the row's height completely unchanged, proving the image square - not
+   the text - is the actual constraint.
+
+   Unconditional (no breakpoint split): 39.0625vw resolves to exactly
+   750px at 1920px and scales continuously and proportionally at every
+   width above and below that, including <1280px where .ic__copy/.ic__img
+   stack to full width instead of sitting side-by-side - a flat-below/
+   vw-above split would reintroduce the exact "fixed at one breakpoint"
+   problem this replaces. */
+.ic__img__item:after {
+  display: none;
+}
+
+.ic__img__item {
+  height: 39.0625vw;
 }
