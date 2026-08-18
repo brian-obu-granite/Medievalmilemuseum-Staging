@@ -1743,7 +1743,10 @@ body .nl__right .gform_wrapper form .gform_footer input:hover {
    padding:0 to cancel the generic h5 rule's own spacing; the inner-page
    banner keeps site.css's original spacing under its h1). */
 .hero__item__copy__description h5 {
-  margin: 0;
+  margin: 0 !important; /* !important needed to beat the bare h5{margin-bottom:60px!important}
+                            rule added elsewhere for testimonial spacing - without it, that
+                            unrelated rule leaks in here (via a plain h5 tag match) and adds
+                            60px of dead space below this text, doubling the box's real height. */
   padding: 0;
 }
 
