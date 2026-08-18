@@ -5,19 +5,19 @@
     {
       "id": 1,
       "title": "An Hour Well Spent",
-      "copy": "I decided to do the guided tour based on reviews I read. And I'm so glad I did. My tour guide was Anna and not only was she extremely knowledgeable about Kilkenny's history, but you could tell she was genuinely interested and passionate about it, which made the tour even better. We spent an hour walking around various sites in the city and I left feeling like I had such a greater understanding and appreciation for this magnificent place.",
+      "copy": "I decided to do the guided tour based on reviews I read. And I'm so glad I did. My tour guide was Anna and not only was she extremely knowledgeable about Kilkenny's history, but you could tell she was genuinely interested and passionate about it, which made the tour even better.",
       "attribution": "Jaime, Washington"
     },
     {
       "id": 2,
       "title": "We Found the \"O\"!!🍀",
-      "copy": "Florida Four really enjoyed John. He was so passionate and you could tell he Loved telling the history before we were even done purchasing our tickets for the self guided tour he had so much information. After we were finished and leaving we met him outside as he may have been coming back from break and he helped our friend find why the \"O\" was dropped in his name. We will be back again John Thank you. 💚🍀",
+      "copy": "Florida Four really enjoyed John. He was so passionate and you could tell he Loved telling the history before we were even done purchasing our tickets for the self guided tour he had so much information.",
       "attribution": ""
     },
     {
       "id": 3,
       "title": "Amazing Tour of the Medieval Mile!",
-      "copy": "I went on a guided tour with Joe and two other visitors, and had the most amazing time! I learnt lots about the history of the town, the medieval day to day life, and the individual streets and lanes. Price was extremely reasonable for the information I received! Joe answered all of my little nitpicky questions honestly and admitted what he didn't know, which made the experience feel earnest and human!",
+      "copy": "I went on a guided tour with Joe and two other visitors, and had the most amazing time! I learnt lots about the history of the town, the medieval day to day life, and the individual streets and lanes. Price was extremely reasonable for the information I received!",
       "attribution": ""
     },
     {
@@ -35,7 +35,7 @@
     {
       "id": 6,
       "title": "Fabulous Tours with John!",
-      "copy": "John was so entertaining and informative - we loved his tour! Actually, we did 2 tours with him; the outside Medieval Mile walking tour, AND the indoor museum tour. He is such an engaging and lively guide, full of fascinating information and stories that really bring medieval times alive. I highly recommend doing both tours!",
+      "copy": "John was so entertaining and informative - we loved his tour! Actually, we did 2 tours with him; the outside Medieval Mile walking tour, AND the indoor museum tour. He is such an engaging and lively guide, full of fascinating information and stories that really bring medieval times alive.",
       "attribution": ""
     },
     {
@@ -59,7 +59,7 @@
     {
       "id": 10,
       "title": "A Must See Attraction!",
-      "copy": "Absolutely fantastic museum! I would highly recommend visiting the Medieval Mile Museum and getting a guided tour as it is well worth it. The tour guide John, knows an abundance of knowledge about Kilkenny's culture and heritage. He totally brings the history to life which allows you to fully immerse yourself into the experience and the importance of this site. It was a brilliant experience and I couldn't recommend it enough! The gift shop also provides an opportunity to find very unique and reasonably priced items that are not found in other traditional Irish gift shops. I truly couldn't recommend this experience enough!!",
+      "copy": "Absolutely fantastic museum! I would highly recommend visiting the Medieval Mile Museum and getting a guided tour as it is well worth it. The tour guide John, knows an abundance of knowledge about Kilkenny's culture and heritage.",
       "attribution": ""
     },
     {
@@ -77,7 +77,7 @@
     {
       "id": 13,
       "title": "History Comes Alive",
-      "copy": "My husband and I have been fortunate to travel fairly extensively, and we have been to many museums and engaged many guides. The guide here is absolutely top-shelf. He does what the best can do—engaging and educated, he imparts a wonderful big-picture perspective on what life was like then, and how much has changed (yet how much people have stayed the same). And for the rate of a museum admission it is an absolute bargain. Do yourself a favour, turn on your Google maps and find this place.",
+      "copy": "My husband and I have been fortunate to travel fairly extensively, and we have been to many museums and engaged many guides. The guide here is absolutely top-shelf.",
       "attribution": ""
     },
     {
@@ -99,14 +99,14 @@
   const PAGE_OWN_TESTIMONIAL = {
     'education': {
       "title": "Our tour guide was fantastic.",
-      "copy": "We recently visited the Medieval Mile Museum on a class trip and were blown away! She pitched the tour at exactly the right level for the children and the information she provided was hugely interesting. The children loved learning about the Black Death, guessing at the origins of the artefacts and discussing the figures represented in the effigies. They enjoyed the thrill of crossing the glass panels set into the floors and are still talking about the tombs in the graveyard. The tour culminates in a Lego Hunt which gives the children the opportunity to race around in an effort to find all of the listed Lego characters. There wasn't a corner of the museum left unexplored by the class and the overall feeling at the end of the tour was one of high good humour. I highly recommend a visit to the Medieval Mile Museum. Thanks to all of the amazing and highly professional staff involved.",
+      "copy": "We recently visited the Medieval Mile Museum on a class trip and were blown away! She pitched the tour at exactly the right level for the children and the information she provided was hugely interesting.",
       "attribution": "Ms. Mackey, Class Teacher"
     },
     'events-exhibitions': 'An Hour Well Spent',
     'explore': 'A Must See Attraction!',
     'venue-hire': {
       "title": "Perfect venue for April Sounds",
-      "copy": "The Medieval Mile Museum was the perfect venue for April Sounds. The venue gave all in attendance a true Kilkenny welcome, immersing the audience into Kilkenny's culture and history while providing a beautiful setting for the artists to showcase their music. The sound was incredible. The outdoor space was ideal for pop up performances throughout the day too. Anne-Marie, Sarah, Grace and all the team at the museum were so helpful and accommodating from the lead up to and on the day of the concerts.",
+      "copy": "The Medieval Mile Museum was the perfect venue for April Sounds. The venue gave all in attendance a true Kilkenny welcome, immersing the audience into Kilkenny's culture and history while providing a beautiful setting for the artists to showcase their music. The sound was incredible.",
       "attribution": "Andrea Keogh, Event Manager"
     },
     'medieval-mile-trail': {
@@ -116,13 +116,13 @@
     },
     'events': {
       "title": "Festival Director Kilkenny Tradfest",
-      "copy": "Kilkenny Tradfest was thrilled to programme concerts with some of Ireland's most highly acclaimed traditional musicians and vocalists in the stunning Medieval Míle Museum. This historic landmark church, beautifully restored, provided a very special atmosphere and backdrop for both performers and audiences and added tremendously to the concert experience.",
+      "copy": "Kilkenny Tradfest was thrilled to programme concerts with some of Ireland's most highly acclaimed traditional musicians and vocalists in the stunning Medieval Míle Museum.",
       "attribution": "Marian Flannery"
     },
     'admission-opening-hours': 'Amazing Tour of the Medieval Mile!',
     'weddings': {
       "title": "Our Wedding",
-      "copy": "Our sincerest thanks to the whole team in the Medieval Mile Museum for making our wedding day so special and memorable for all our guests. Chloë and I both knew that the museum would look incredible for our wedding ceremony. The way the space was able to be transformed for the day was stunning. The ceremony itself went so well. All of our guests have remarked how exceptional the ceremony was and how having it in a place with so much history was so extraordinary. We hope to visit the Museum again for many years to come and will have no hesitation in recommending you all to any friends and family who are getting married.",
+      "copy": "Our sincerest thanks to the whole team in the Medieval Mile Museum for making our wedding day so special and memorable for all our guests. Chloë and I both knew that the museum would look incredible for our wedding ceremony. The way the space was able to be transformed for the day was stunning.",
       "attribution": "Chloë & Barry"
     },
     'guided-museum-tour': 'A Must See Attraction!'
@@ -145,9 +145,19 @@
   // own testimonial as slide 1 (see PAGE_OWN_TESTIMONIAL above). Detected
   // by matching the current path against each known page's own folder
   // name, same way the testimonials-page/homepage split already works.
+  //
+  // The second condition below used to be a `path.indexOf(...) ===
+  // path.length - key.length - 1` arithmetic check, meant to also match a
+  // path ending in the key without a trailing slash. That broke for
+  // '/events/index.html' against the key 'events-exhibitions': neither
+  // side of the comparison could actually find a match, so both
+  // independently evaluated to -1, and -1 === -1 read as a false "match" -
+  // silently showing events-exhibitions' testimonial on the Events page
+  // instead of its own. endsWith() checks a real suffix, so two
+  // "not found" results can no longer coincidentally compare equal.
   function renderPageCarousel(testimonials) {
     const path = window.location.pathname;
-    const pageKey = Object.keys(PAGE_OWN_TESTIMONIAL).find(key => path.indexOf('/' + key + '/') !== -1 || path.indexOf('/' + key) === path.length - key.length - 1);
+    const pageKey = Object.keys(PAGE_OWN_TESTIMONIAL).find(key => path.indexOf('/' + key + '/') !== -1 || path.endsWith('/' + key));
     if (!pageKey) {
       return false;
     }

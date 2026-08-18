@@ -798,28 +798,31 @@ body .nl__right .gform_wrapper form .gform_footer input:hover {
   mix-blend-mode: normal;
 }
 
-/* Pig reduced 10% from 448x363 to 403.2x326.7 at the 1920px baseline (own
-   aspect ratio, distinct from the shared --top-right sizing above):
-   403.2/1920=21vw, 326.7/1920=17.01563vw. */
+/* Pig reduced a further 10% from its live 1920px-rendered size (403.2x326.7,
+   confirmed via computed style before this change, matching the values in
+   the superseded comment below) to 362.88x294.03 at the 1920px baseline:
+   362.88/1920=18.9vw, 294.03/1920=15.31406vw. */
 .quote_box__shape--top-left {
   top: 1px;
   left: -1px;
   bottom: auto;
   right: auto;
-  width: 21vw;
-  height: 17.01563vw;
+  width: 18.9vw;
+  height: 15.31406vw;
   object-position: left top;
 }
 
-/* Wolf reduced 10% from 502x341 to 451.8x306.9 at the 1920px baseline:
-   451.8/1920=23.53125vw, 306.9/1920=15.98438vw. */
+/* Wolf reduced a further 10% from its live 1920px-rendered size (451.8x306.9,
+   confirmed via computed style before this change, matching the values in
+   the superseded comment below) to 406.62x276.21 at the 1920px baseline:
+   406.62/1920=21.17813vw, 276.21/1920=14.38594vw. */
 .quote_box__shape--bottom-right {
   top: auto;
   left: auto;
   bottom: 1px;
   right: -1px;
-  width: 23.53125vw;
-  height: 15.98438vw;
+  width: 21.17813vw;
+  height: 14.38594vw;
   object-position: right bottom;
 }
 
@@ -882,9 +885,16 @@ body .nl__right .gform_wrapper form .gform_footer input:hover {
    for one fixed mobile height to fit every instance without clipping text -
    letting height fall back to auto (content-driven, matching every other
    breakpoint's current unstyled behaviour) is safer there than guessing a
-   fixed value that isn't part of this request. */
+   fixed value that isn't part of this request.
+
+   Reduced 20% from 997px to 797.6px at 1920 (797.6/1920 = 41.54167vw). Note:
+   this rule is currently shadowed everywhere it would apply - every real
+   single-testimonial instance site-wide happens to share the exact same
+   static id="quote_box_4" (a template artifact, not a per-page counter),
+   so #quote_box_4 .quote_box below always wins on specificity instead. Kept
+   in sync anyway so it's correct if that ID collision is ever fixed. */
 .quote_box {
-  height: 51.92708vw;
+  height: 41.54167vw;
 }
 
 /* Testimonials page's full list (.quote_box__list, still all 14 entries) -
@@ -898,10 +908,20 @@ body .nl__right .gform_wrapper form .gform_footer input:hover {
    length is too much variance for one fixed mobile height to fit safely;
    the homepage carousel doesn't have that problem (see below) but this
    page still does, so it stays on the older, more conservative rule. */
+/* Height rate reduced 20% from 850px to 680px at 1920 (680/1920 =
+   35.41667vw) - but a flat 680px alone clips real content: measured all 14
+   testimonials' actual (unclipped) inner height at 1920px, one needs 547px
+   against the padding-adjusted ~532px this would leave available (a 15px
+   shortfall), worse narrower down toward 1280px where the column wraps
+   more. Given max(720px, ...vw) with the same 720px floor already used by
+   #quote_box_4 .quote_box below, for consistency and because it's already
+   confirmed safe for this same 14-testimonial content elsewhere on the
+   site - re-verified against all 14 entries at 1280/1440/1920px with this
+   floor, no clipping. */
 @media (min-width: 1280px) {
   .quote_box__list .quote_box {
     padding: 3.85417vw 0;
-    height: 44.27083vw;
+    height: max(720px, 35.41667vw);
   }
 }
 
@@ -931,15 +951,26 @@ body .nl__right .gform_wrapper form .gform_footer input:hover {
    997px -> 850px) is already too small to fit the same content by 1024-
    1279px. Measured this component's actual natural (unclipped) height at
    375/768/1024/1279/1440/1920/2560px with this same padding applied: the
-   highest need in the range where 44.27083vw alone would be too small is
+   highest need in the range where the vw rate alone would be too small is
    672px (at 1279px) - 720px is used as a flat floor with margin at every
-   width below the ~1626px crossover, then 44.27083vw takes over and
-   scales unbounded above it (matching 850px at 1920px, and still with
-   >100px to spare at 2560px, the widest tested) - continuous the whole
-   way, no breakpoint jump. */
+   width below the crossover, then the vw rate takes over and scales
+   unbounded above it, continuous the whole way, no breakpoint jump.
+
+   1920px value requested down 20% (850px -> 680px, i.e. 35.41667vw) - but
+   680px is BELOW the 720px floor above, which is independently set by the
+   672px content-fit measurement, not by the 1920px value, and wasn't part
+   of this request. Left the floor at 720px rather than scaling it down
+   too (which would reopen the exact text-clipping problem it was added to
+   prevent, since the underlying copy/font-size here hasn't changed) - so
+   this rule's actual rendered height is max(720px, 35.41667vw), meaning
+   the visible result at 1920px is 720px (-15.3% from 850px, not the full
+   -20%) up to a crossover around 2033px, above which the vw rate takes
+   back over and keeps scaling unbounded as before. The other two
+   .quote_box height rules above/below aren't floor-constrained and do get
+   the full -20%. */
 #quote_box_4 .quote_box {
   padding: 3.85417vw 0;
-  height: max(720px, 44.27083vw);
+  height: max(720px, 35.41667vw);
 }
 
 /* ==========================================================================
@@ -2833,6 +2864,69 @@ body.page-id-753 #two_column_content_2 .page-content {
 .cta.admission .cta__accordion-col--getting-here .acc__box {
   margin-bottom: 0;
 }
+
+/* ==========================================================================
+   Site-wide section top/bottom padding standardization: every section
+   wrapper below used to inherit (or redundantly redeclare) the base
+   theme's own unconditional-vw + two-flat-tier pattern (7.8125vw
+   desktop, flat 50px <=1279px, flat 60px <=767px) - the same
+   "flat plateau" bug class already fixed for h1-h6/card-title/hero
+   elsewhere in this file: frozen across the entire 768-1279px band,
+   with a hard discontinuity at each boundary (a backwards jump UP
+   crossing 1280->1279px, another jump crossing 768->767px).
+
+   Standardized target: 80px @1920px (= 4.16667vw, an exact ratio - no
+   px offset needed). Floor chosen at 32px, which this same 4.16667vw
+   rate already produces almost exactly at 768px (4.16667% * 768 =
+   32.0px) - so the floor and the fluid rate meet cleanly with no
+   visible seam, and the whole formula collapses to a single
+   continuous curve from 0 up to 1920px and beyond (unbounded above
+   1920, matching every other token's convention), with the flat
+   32px only taking over below ~768px on small phones.
+
+   .module is the shared base class nearly every section wrapper
+   carries (Explore the Museum, feature blocks/.ic__sec/.bic__sec,
+   Highlights cards/.lbs__sec, testimonials wrapper/.quote_box__sec,
+   card grids/.cg__sec, newsletter/.nl__sec, etc.) - overriding it
+   here is what makes this "site-wide" rather than a set of duplicate
+   copies of the same number (the same drift risk that caused the
+   H4/H5 and card-title bugs earlier). .slider__sec, .ic__sec and
+   .bic__sec used to redeclare this exact value themselves; those
+   redundant copies are deliberately NOT re-added - they now inherit
+   from .module alone.
+
+   Placed BEFORE .content-filter__sec and .info-strip__sec below (both
+   of which also carry the shared .module class): those two keep their
+   own intentional bespoke padding-top since, at equal specificity,
+   whichever same-file rule comes LAST wins - this block must stay
+   above them or it would silently clobber both. */
+.module {
+  padding: max(32px, 4.16667vw) 0;
+}
+
+/* .acc__sec does NOT carry the shared .module class in its one
+   real-world usage (the FAQ page's standalone accordion section), so
+   it can't inherit the rule above - it needs its own copy of the
+   same formula. */
+.acc__sec {
+  padding: max(32px, 4.16667vw) 0;
+}
+
+/* CTA content block (Admission & Opening Hours, Membership, etc.):
+   this is the INNER .cta div, a second layer of padding nested
+   inside the outer .module .cta__sec wrapper (same double-stack
+   pattern as the testimonials quote box) - previously asymmetric
+   (125px top / 132px bottom @1920) with its own flat 60px plateau
+   <=1279px. Standardized to the same symmetric formula as every
+   other section, top and bottom alike. */
+.cta {
+  padding: max(32px, 4.16667vw) 0;
+}
+
+/* Testimonials: only the OUTER .quote_box__sec wrapper is
+   standardized above via .module. The INNER .quote_box div's own
+   asymmetric padding (161px top / 51px bottom <=1279px, reserving
+   room for the quote icon) is intentionally left untouched. */
 
 /* ==========================================================================
    Content filter bar (What's On / Blog): category tabs + "Filter by Month"
