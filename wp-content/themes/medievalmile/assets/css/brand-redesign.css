@@ -1070,15 +1070,42 @@ body .nl__right .gform_wrapper form .gform_footer input:hover {
   position: relative;
 }
 
+/* Icon reduced 20% from 13.54167vw/11.09375vw (260x213 @1920) to
+   10.83333vw/8.875vw (208x170.4 @1920), applied to the formula's rate
+   itself rather than re-anchoring to a different reference width - so
+   every width in this rule's active range (>=1280px, matching
+   .quote_box__quote-icon's own breakpoint below) shrinks by the same
+   20%, including the actual current value at 1440px (195x159.75 ->
+   156x127.8), not just the 1920px endpoint. The <=1279px mobile size
+   (.quote_box__heading:before's own flat override further below, and
+   .quote_box__quote-icon's unconditional base rule) is intentionally
+   left untouched - a separate, already-distinct mobile treatment.
+
+   Position regression from that reduction, now fixed: top/left here used
+   to place the icon's own top-left CORNER at a fixed offset from the
+   heading (top:-5vw; left:-10vw), so shrinking width/height while
+   leaving that corner planted in place pulled the icon's far (bottom-
+   right) edge back out of the heading text instead of scaling in place -
+   a smaller box anchored at the same corner covers less area, not the
+   same area centered differently. Switched to anchoring the icon's
+   CENTER instead of its corner (top/left now target the center point,
+   offset back by half the box's own size via transform), which is
+   inherently size-independent: solved for the center point that
+   reproduces the exact old top:-5vw/left:-10vw corner position at the
+   OLD 13.54167vw/11.09375vw size (center = old offset + old size/2 =
+   -3.22917vw, 0.54688vw), so the icon lands exactly where it did before
+   the resize, and any future resize only needs a width/height change -
+   the center stays put automatically without recalculating an offset. */
 .quote_box__heading:before {
   content: "";
   display: block;
   position: absolute;
   z-index: -1;
-  top: -5vw;
-  left: -10vw;
-  width: 13.54167vw;
-  height: 11.09375vw;
+  top: 0.54688vw;
+  left: -3.22917vw;
+  transform: translate(-50%, -50%);
+  width: 10.83333vw;
+  height: 8.875vw;
   background-image: url(../../dist/images/icon-quote.svg);
   background-repeat: no-repeat;
   background-position: center;
@@ -1276,13 +1303,23 @@ body .nl__right .gform_wrapper form .gform_footer input:hover {
                   same subtree (i.e. the heading text). */
 }
 
+/* Kept in sync with .quote_box__heading:before's own -20% reduction and
+   center-anchored position fix above (same 10.83333vw/8.875vw size,
+   same 0.54688vw/-3.22917vw center point via translate(-50%,-50%)) -
+   this is the rule that actually renders on every carousel instance
+   site-wide, since .quote_box__heading:before is display:none'd on all
+   of them (see #quote_box_4 .quote_box__heading:before above). The
+   <=1279px base rule above this media query (90x73px, its own
+   translateX(-50%) horizontal-only centering) is intentionally left
+   untouched, matching the same mobile-unaffected decision made for
+   .quote_box__heading:before. */
 @media (min-width: 1280px) {
   .quote_box__quote-icon {
-    top: -5vw;
-    left: -10vw;
-    width: 13.54167vw;
-    height: 11.09375vw;
-    transform: none;
+    top: 0.54688vw;
+    left: -3.22917vw;
+    width: 10.83333vw;
+    height: 8.875vw;
+    transform: translate(-50%, -50%);
   }
 }
 
@@ -1559,6 +1596,23 @@ body .nl__right .gform_wrapper form .gform_footer input:hover {
   }
 }
 
+/* Mobile video wrapper: reduced 50% from site.css's own fixed 480px to
+   240px, then increased 25% from that 240px to 300px. Independent of
+   .hero__item__copy's own min-height fix below - verified they don't
+   interact: .hero__item is height:auto here (see above), so it's simply
+   the sum of this wrapper's height plus the copy block's own height,
+   stacked in normal flow. Changing this wrapper only resizes the video
+   area and the overall hero section with it; it has no effect on the
+   copy block's internal layout or the gap fixed below, which is entirely
+   caused by that block's own oversized min-height, not by anything
+   above it. .hero__video-toggle's own mobile offset (further below) is
+   calculated from this same height and must move together with it. */
+@media (max-width: 767px) {
+  .hero__item__img__wrapper {
+    height: 300px;
+  }
+}
+
 .hero__item__video {
   display: block;
   width: 100% !important;
@@ -1577,6 +1631,7 @@ body .nl__right .gform_wrapper form .gform_footer input:hover {
     padding-bottom: 30px;
   }
 }
+
 
 /* Homepage hero copy container: site.css sets this to 41.66667vw (800px
    at the 1920 baseline) - narrowed to 750px (39.0625vw). Scoped to
@@ -1610,6 +1665,32 @@ body .nl__right .gform_wrapper form .gform_footer input:hover {
 @media (max-width: 1279px) {
   .hero__item__copy {
     min-height: max(560px, calc(27.2905vw + 350.7px));
+  }
+}
+
+/* Empty reserved space above the title on mobile: the <=1279px min-height
+   rule just above (tuned for the 768-1279px tablet tier, where
+   .hero__item__copy is absolutely overlaid on a much taller video) was
+   left active all the way down to this stacked, full-width mobile layout
+   too - but this box's own real content (heading + description + CTA)
+   only ever needs ~375-405px including padding at true phone widths
+   (measured 320/375/440/767px), well under the 560px floor that rule
+   evaluates to across this whole range. Since the box is flex with
+   justify-content:flex-end (bottom-anchored), that ~155-185px of unused
+   height collects entirely ABOVE the content instead of being absorbed
+   anywhere else - exactly the empty hatched region above "800 Years of
+   History" in the reference screenshot.
+   Fix: drop the min-height back to auto at this narrower tier, so the
+   box (and the yellow background it draws) hugs its own content exactly
+   at every mobile width instead of guessing a single flat number - zero
+   gap everywhere in this range rather than an approximation that's only
+   correct at one width. Placed after the <=1279px rule above (same
+   specificity, later wins) so this correctly overrides it at <=767px
+   without touching the 768-1279px tablet tier that formula was actually
+   tuned for. */
+@media (max-width: 767px) {
+  .hero__item__copy {
+    min-height: auto;
   }
 }
 
@@ -1751,15 +1832,20 @@ body .nl__right .gform_wrapper form .gform_footer input:hover {
    auto (see above) - grows tall enough to fit the yellow copy block
    stacked below the video. A bottom-anchored offset would follow that
    growth and drift down toward the copy block instead of staying on the
-   video. The video area itself is a fixed 480px (site.css, .hero__item__
-   img__wrapper) starting at .hero__item's own top edge, so anchoring from
-   the top instead (480 - 44 button - 16 gap = 420px) keeps the button in
-   exactly the same visual spot on the video regardless of how tall the
-   copy block below it is. */
+   video. The video area itself is now a fixed 300px (see
+   .hero__item__img__wrapper above) starting at .hero__item's own top
+   edge, so anchoring from the top instead (300 - 44 button - 16 gap =
+   240px) keeps the button in exactly the same visual spot on the video
+   regardless of how tall the copy block below it is. (This offset moves
+   together with the wrapper's own height every time that changes - it
+   was 420px against the original 480px video, then 180px against an
+   interim 240px, now 240px against the current 300px - recalculating it
+   here each time avoids the button drifting off the video and
+   overlapping the copy block instead.) */
 @media (max-width: 767px) {
   .hero__video-toggle {
     right: 16px;
-    top: 420px;
+    top: 240px;
     bottom: auto;
     width: 44px;
     height: 44px;
