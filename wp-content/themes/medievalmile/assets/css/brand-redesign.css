@@ -164,6 +164,17 @@ html {
    keeps its own pre-existing extra 1199px step, since no bug ever came
    from that one - left as-is, just tokenized). */
 :root {
+  /* Shared mobile (<=767px) banner-image height, used by both the
+     homepage hero (.hero__item__img__wrapper) and every inner-page
+     banner (.page-banner__img__wrapper) - unified to the hero's own
+     reduced value (300px, after this session's -50% then +25% changes)
+     rather than the inner-page banners' original 345px, so the two
+     don't drift out of sync the way they had until now. Referencing one
+     variable from both rules means a future change to either
+     automatically keeps them matched, rather than needing to remember
+     to update two separate hardcoded numbers. */
+  --mobile-banner-img-height: 300px;
+
   --h1-size-1920: 4.94792vw; /* 95px */
   --h1-size-1279: 88px;
   --h1-size-991: 68px;
@@ -1597,7 +1608,10 @@ body .nl__right .gform_wrapper form .gform_footer input:hover {
 }
 
 /* Mobile video wrapper: reduced 50% from site.css's own fixed 480px to
-   240px, then increased 25% from that 240px to 300px. Independent of
+   240px, then increased 25% from that 240px to 300px - now expressed via
+   the shared --mobile-banner-img-height variable (see :root above) so it
+   stays unified with .page-banner__img__wrapper's own mobile height
+   further below instead of drifting apart again. Independent of
    .hero__item__copy's own min-height fix below - verified they don't
    interact: .hero__item is height:auto here (see above), so it's simply
    the sum of this wrapper's height plus the copy block's own height,
@@ -1609,7 +1623,19 @@ body .nl__right .gform_wrapper form .gform_footer input:hover {
    calculated from this same height and must move together with it. */
 @media (max-width: 767px) {
   .hero__item__img__wrapper {
-    height: 300px;
+    height: var(--mobile-banner-img-height);
+  }
+}
+
+/* Inner-page banner image wrapper (What's On, Explore, etc.): site.css's
+   own fixed 345px unified with the homepage hero's own mobile height
+   above via the same --mobile-banner-img-height variable, so the two
+   feel consistent in scale on mobile instead of the hero being
+   noticeably shorter after this session's reductions while every other
+   page's banner stayed at its original size. */
+@media (max-width: 767px) {
+  .page-banner__img__wrapper {
+    height: var(--mobile-banner-img-height);
   }
 }
 
